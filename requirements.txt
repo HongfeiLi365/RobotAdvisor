@@ -1,1 +1,3 @@
 flask
+yahoo_fin
+html5lib
