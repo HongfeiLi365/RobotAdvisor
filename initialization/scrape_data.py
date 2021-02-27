@@ -9,7 +9,7 @@ class YahooReader():
     https://github.com/atreadw1492/yahoo_fin
     """
 
-    def __init__(self, tickers, key_stats=True, stmts=False):
+    def __init__(self, tickers, key_stats=True, stmts=False, prices=False):
         """Initialize reader and collect data.
 
         Parameters
@@ -27,6 +27,9 @@ class YahooReader():
 
         if stmts:
             self._req_financials()
+
+        if prices:
+            self.prices = self._req_prices()
 
     def _try_request(self, func, ticker, max_tries=3):
         """
@@ -56,17 +59,16 @@ class YahooReader():
         """
         Requests and reformats key statistics. 
         """
-        stats_ = []
-        for t in self.tickers:
-            t_ = t.replace('.', '-')
-            stats = self._try_request(si.get_stats, ticker=t_)
+        all_stats = []
+        for ticker in self.tickers:
+            stats = self._try_request(si.get_stats, ticker=ticker)
             if stats is None:
                 continue
             stats.index = stats['Attribute']
-            stats_.append(stats.drop(['Attribute'], axis=1).rename(
-                columns={'Value': t}))
-        stats_ = pd.concat(stats_, axis=1)
-        return stats_
+            all_stats.append(stats.drop(['Attribute'], axis=1).rename(
+                columns={'Value': ticker}))
+        all_stats = pd.concat(all_stats, axis=1)
+        return all_stats
 
     def _req_financials(self):
         """
@@ -83,19 +85,19 @@ class YahooReader():
             'yearly_balance_sheet': [],
             'yearly_cash_flow': []
         }
-        for t in self.tickers:
-            stmts = self._try_request(si.get_financials, ticker=t)
+        for ticker in self.tickers:
+            stmts = self._try_request(si.get_financials, ticker=ticker)
             if stmts is None:
                 continue
             for stmt_type in stmts.keys():
                 df = stmts[stmt_type].T
-                df.index = pd.MultiIndex.from_product([[t], df.index])
+                df.index = pd.MultiIndex.from_product([[ticker], df.index])
                 stmt_dict[stmt_type].append(df)
 
         def _concat_and_fmt(stmt_type):
             df = pd.concat(stmt_dict[stmt_type])
-            df.index.names = ['Sid', 'Date']
-            df.columns.name = 'Field'
+            df.index.names = ['symbol', 'date']
+            df.columns.name = 'field'
             return df.sort_index(level=1).sort_index(level=0)
 
         self.income_stmt_qtr = _concat_and_fmt('quarterly_income_statement')
@@ -105,13 +107,25 @@ class YahooReader():
         self.cash_flow_qtr = _concat_and_fmt('quarterly_cash_flow')
         self.cash_flow_annual = _concat_and_fmt('yearly_cash_flow')
 
+    def _req_prices(self):
+        all_prices = []
+        for ticker in self.tickers:
+            prices = self._try_request(si.get_data, ticker=ticker)
+            if prices is None:
+                continue
+            prices = prices.reset_index().rename({'index':'date', 'ticker':'symbol'},axis=1)
+            all_prices.append(prices)
+        all_prices = pd.concat(all_prices)
+        return all_prices
+
 
 def test():
     # Test cases
     pd.set_option('display.max_rows', 5)
-    yr = YahooReader(['AAPL', 'TSLA', 'BAC', 'DE'], stmts=True)
+    yr = YahooReader(['AAPL', 'TSLA', 'BAC', 'DE'], stmts=True, prices=True)
     print(yr.balance_sheet_qtr)
     print(yr.key_stats.loc['Current Ratio (mrq)'])
+    print(yr.prices)
     yr2 = YahooReader(['QCOM'], key_stats=False, stmts=True)
     print(yr2.income_stmt_annual)
     yr3 = YahooReader(['ACN', 'ZM', 'BA'])
