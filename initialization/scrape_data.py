@@ -120,8 +120,8 @@ class YahooReader():
                                 force_refresh=False):
         file_name = os.path.join(folder_path, "stats.csv")
         if force_refresh or not os.path.isfile(file_name):
-            self.key_stats = self.request_stats(tickers)
-            self.key_stats.transpose().to_csv(file_name)
+            key_stats = self.request_stats(tickers)
+            key_stats.transpose().to_csv(file_name)
 
     def save_prices_if_not_exist(self, tickers,
                                  folder_path='.',
@@ -129,33 +129,36 @@ class YahooReader():
 
         file_name = os.path.join(folder_path, "prices.csv")
         if force_refresh or not os.path.isfile(file_name):
-            self.prices = self.request_prices(tickers)
-            self.prices.to_csv(file_name, index=False)
+            prices = self.request_prices(tickers)
+            prices.to_csv(file_name, index=False)
 
     def save_financials_if_not_exist(self, tickers,
                                      folder_path='.',
                                      force_refresh=False):
         qtr_file_name = os.path.join(folder_path, "financials_qtr.csv")
+        yr_file_name = os.path.join(folder_path, "financials_annual.csv")
         if force_refresh or not os.path.isfile(qtr_file_name):
-            self.financials_qtr, self.financials_annual = self.request_financials(
+            financials_qtr, financials_annual = self.request_financials(
                 tickers)
-            self.financials_qtr.to_csv(file_name)
-            yr_file_name = os.path.join(folder_path, "financials_annual.csv")
+            financials_qtr.to_csv(qtr_file_name)
             financials_annual.to_csv(yr_file_name)
 
     def save_data(self, tickers, key_stats=True, financials=True, prices=True,
-                  folder_path='.', force_refresh=False):
-
-        os.makedirs(folder_path, exist_ok=True)
-        if key_stats:
-            self.collect_stats_if_not_exist(tickers,
-                                            folder_path, force_refresh)
-        if financials:
-            self.collect_financials_if_not_exist(tickers,
-                                                 folder_path, force_refresh)
-        if prices:
-            self.collect_prices_if_not_exist(tickers,
-                                             folder_path, force_refresh)
+                  folder_path='.', batch_size=20, force_refresh=False):
+        for i in range(0, len(tickers), batch_size):
+            batch_i = i // batch_size
+            batch_folder = os.path.join(folder_path, "batch_"+str(i))
+            os.makedirs(batch_folder, exist_ok=True)
+            batch_tickers = tickers[i:i+batch_size]
+            if key_stats:
+                self.save_stats_if_not_exist(
+                    batch_tickers, batch_folder, force_refresh)
+            if financials:
+                self.save_financials_if_not_exist(
+                    batch_tickers, batch_folder, force_refresh)
+            if prices:
+                self.save_prices_if_not_exist(
+                    batch_tickers, batch_folder, force_refresh)
 
 
 def main():
@@ -176,6 +179,8 @@ def test():
 
     tickers = ['AAPL', 'ABC.DEF&GHI']
     print(yr.request_stats(tickers))
+
+    yr.save_data(tickers, folder_path="data_test", force_refresh=True)
 
 
 if __name__ == "__main__":
