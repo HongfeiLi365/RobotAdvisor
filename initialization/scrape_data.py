@@ -2,6 +2,7 @@ import yahoo_fin.stock_info as si
 import pandas as pd
 import time
 import os
+import random
 
 
 class YahooReader():
@@ -31,7 +32,8 @@ class YahooReader():
                 time.sleep(3)
                 n += 1
                 if n == max_tries:
-                    raise Exception('Could not connect to Yahoo.')
+                    raise Exception(
+                        'Could not connect to Yahoo. Please try later.')
         return df
 
     def request_stats(self, tickers):
@@ -145,9 +147,11 @@ class YahooReader():
 
     def save_data(self, tickers, key_stats=True, financials=True, prices=True,
                   folder_path='.', batch_size=20, force_refresh=False):
+        tickers = sorted(tickers)
         for i in range(0, len(tickers), batch_size):
             batch_i = i // batch_size
-            batch_folder = os.path.join(folder_path, "batch_"+str(i))
+            print("Collecting batch #{}".format(batch_i))
+            batch_folder = os.path.join(folder_path, "batch_"+str(batch_i))
             os.makedirs(batch_folder, exist_ok=True)
             batch_tickers = tickers[i:i+batch_size]
             if key_stats:
@@ -159,12 +163,17 @@ class YahooReader():
             if prices:
                 self.save_prices_if_not_exist(
                     batch_tickers, batch_folder, force_refresh)
+            time.sleep(random.random()*5+3)
 
 
 def main():
     # get key stats, financial statements, and prices data of SP500 stocks
-    yr = YahooReader(si.tickers_sp500())
-    yr.collect_data(folder_path='data_sp500')
+    tickers_nasdaq = si.tickers_nasdaq()
+    tickers_other = si.tickers_other()
+    tickers_sp500 = si.tickers_sp500()
+
+    yr = YahooReader()
+    yr.save_data(tickers_sp500, folder_path='data_sp500')
     print("All Done!")
 
 
@@ -180,8 +189,8 @@ def test():
     tickers = ['AAPL', 'ABC.DEF&GHI']
     print(yr.request_stats(tickers))
 
-    yr.save_data(tickers, folder_path="data_test", force_refresh=True)
+    yr.save_data(tickers, folder_path="data_test", force_refresh=False)
 
 
 if __name__ == "__main__":
-    test()
+    main()
