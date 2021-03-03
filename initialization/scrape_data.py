@@ -123,7 +123,9 @@ class YahooReader():
         file_name = os.path.join(folder_path, "stats.csv")
         if force_refresh or not os.path.isfile(file_name):
             key_stats = self.request_stats(tickers)
-            key_stats.transpose().to_csv(file_name)
+            key_stats = key_stats.transpose()
+            key_stats.index = key_stats.index.rename("symbol")
+            key_stats.to_csv(file_name)
 
     def save_prices_if_not_exist(self, tickers,
                                  folder_path='.',
@@ -164,6 +166,43 @@ class YahooReader():
                 self.save_prices_if_not_exist(
                     batch_tickers, batch_folder, force_refresh)
             time.sleep(random.random()*5+3)
+            if batch_i > 0 and batch_i % 10 == 0:
+                print("Pause for 120 seconds...")
+                time.sleep(120)
+
+        self.combine_batches(folder_path)
+
+    def combine_batches(self, folder_path):
+        all_stats = []
+        all_prices = []
+        all_financials_q = []
+        all_financials_y = []
+        for root, dirs, files in os.walk(folder_path):
+            for file in files:
+                file_path = os.path.join(root, file)
+                if file.endswith('stats.csv'):
+                    all_stats.append(pd.read_csv(file_path, index_col=[0]))
+                elif file.endswith('prices.csv'):
+                    all_prices.append(pd.read_csv(
+                        file_path, index_col=[0], parse_dates=True))
+                elif file.endswith('_qtr.csv'):
+                    all_financials_q.append(pd.read_csv(
+                        file_path,   parse_dates=['date']))
+                elif file.endswith('_annual.csv'):
+                    all_financials_y.append(pd.read_csv(
+                        file_path,  parse_dates=['date']))
+
+        all_stats = pd.concat(all_stats)
+        all_prices = pd.concat(all_prices)
+        all_financials_q = pd.concat(all_financials_q)
+        all_financials_y = pd.concat(all_financials_y)
+
+        all_stats.to_csv(os.path.join(folder_path, "all_stats.csv"))
+        all_prices.to_csv(os.path.join(folder_path, "all_prices.csv"))
+        all_financials_q.to_csv(os.path.join(
+            folder_path, "all_financials_q.csv"), index=False)
+        all_financials_y.to_csv(os.path.join(
+            folder_path, "all_financials_y.csv"), index=False)
 
 
 def main():
