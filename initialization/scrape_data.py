@@ -25,6 +25,9 @@ class YahooReader():
                 # Likely invalid symbol so skip ahead
                 print('Yahoo Reader failed to read: ' + ticker)
                 break
+            except KeyError:
+                print("Yahoo Reader failed to read: {} because of Key Error".format(ticker))
+                break
             except:
                 # Likely failed to connect to Yahoo
                 print('Failed to connect to Yahoo.' +
@@ -207,12 +210,16 @@ class YahooReader():
 
 def main():
     # get key stats, financial statements, and prices data of SP500 stocks
-    tickers_nasdaq = si.tickers_nasdaq()
-    tickers_other = si.tickers_other()
-    tickers_sp500 = si.tickers_sp500()
+    tickers_nasdaq = set(si.tickers_nasdaq())
+    tickers_other = set(si.tickers_other())
+    tickers_sp500 = set(si.tickers_sp500())
+    
+    tickers_nasdaq_ = list(tickers_nasdaq - tickers_sp500)
+    tickers_other_ = list(tickers_other - tickers_sp500)
+    tickers_sp500 = list(tickers_sp500)
 
     yr = YahooReader()
-    yr.save_data(tickers_sp500, folder_path='data_sp500')
+    yr.save_data(tickers_nasdaq_, folder_path='data_nasdaq')
     print("All Done!")
 
 
