@@ -36,9 +36,11 @@ def clean_prices(file_path):
     use_cols = ['symbol', 'date', 'open', 'high',
                 'low', 'close', 'adjclose', 'volume']
     prices = prices.loc[:, use_cols]
-    prices[['close','adjclose']] = prices.sort_values(["symbol","date"]).groupby("symbol")[['close','adjclose']].ffill().bfill()
+    prices[['close', 'adjclose']] = prices.sort_values(["symbol", "date"]).groupby(
+        "symbol")[['close', 'adjclose']].ffill().bfill()
     prices['volume'] = prices['volume'].fillna(0)
-    prices.loc[prices.isna()['open']] = prices.loc[prices.isna()['open']].fillna(method='bfill', axis=1)
+    prices.loc[prices.isna()['open']] = prices.loc[prices.isna()[
+        'open']].fillna(method='bfill', axis=1)
     return prices
 
 
@@ -83,6 +85,18 @@ def clean_financials(file_path):
     financials = financials.dropna(how='all', axis=1)
     financials = financials.drop(
         ['net_income.1', 'minority_interest.1'], axis=1)
-    financials = financials.dropna(subset=['symbol','date'], how='any')
+    financials = financials.dropna(subset=['symbol', 'date'], how='any')
     financials = financials.fillna(0)
     return financials
+
+
+if __name__ == "__main__":
+
+    statistics = clean_statistics("data_sp500/all_stats.csv")
+    financials = clean_financials("data_sp500/all_financials_q.csv")
+    prices = clean_prices("data_sp500/all_prices.csv")
+
+    statistics.to_csv("data_sp500/all_stats_clean.csv", index=False)
+    financials.to_csv("data_sp500/all_financials_clean.csv", index=False)
+    prices.to_csv("data_sp500/all_prices_clean.csv", index=False)
+

@@ -93,9 +93,9 @@ def main():
         "PRIMARY KEY(symbol, date))")
 
 
-    statistics = clean_statistics("data_sp500/all_stats.zip")
-    financials = clean_financials("data_sp500/all_financials_q.zip")
-    prices = clean_prices("data_sp500/all_prices.zip")
+    statistics = pd.read_csv("data_sp500/all_stats_clean.csv")
+    financials =  pd.read_csv("data_sp500/all_financials_clean.csv")
+    prices = pd.read_csv("data_sp500/all_prices_clean.csv")
 
     insert_dataframe(mydb, statistics, 'statistics')
     insert_dataframe(mydb, financials, 'financials')
