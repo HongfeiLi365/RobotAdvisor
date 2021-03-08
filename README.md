@@ -9,3 +9,4 @@ CS411 Database System Project. View your current portfolio, and use the Robot to
  # Command I have been using to run the flaskblog
 
 python3 run.py
+Don't forget about the venv
