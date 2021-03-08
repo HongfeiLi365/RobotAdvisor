@@ -2,3 +2,4 @@ flask
 yahoo_fin
 html5lib
 pandas
+mysql-connector-python
