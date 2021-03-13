@@ -113,8 +113,9 @@ if __name__ == "__main__":
         financials.to_csv(os.path.join(folder, "all_financials_clean.csv"), index=False)
         prices.to_csv(os.path.join(folder, "all_prices_clean.csv"), index=False)
 
+    os.makedirs('data', exist_ok=True)
     for data in  ['stats', 'financials', 'prices']:
-        concat_univ(data)
+        concat_univ(data, 'data')
 
 
 
