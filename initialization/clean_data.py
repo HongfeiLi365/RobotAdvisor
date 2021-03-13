@@ -71,9 +71,9 @@ def clean_statistics(file_path):
         stats[col] = parse_big_num(stats[col])
 
     stats['most_recent_quarter'] = pd.to_datetime(
-        stats['most_recent_quarter']).dt.strftime("%Y-%m-%d").fillna('2099-12-31')
+            stats['most_recent_quarter']).dt.strftime("%Y-%m-%d")
 
-    stats = stats.dropna(subset=['symbol'], how='any')
+    stats = stats.dropna(subset=['symbol', 'most_recent_quarter'], how='any')
     stats = stats.fillna(-999)
     return stats
 
@@ -89,14 +89,37 @@ def clean_financials(file_path):
     financials = financials.fillna(0)
     return financials
 
+def concat_univ(data='stats', output_dir='.'):
+    file_name = 'all_{}_clean.csv'.format(data)
+    df_list = []
+    for folder in ['data_sp500', 'data_nasdaq', 'data_other']:
+        df_list.append(pd.read_csv(os.path.join(folder, file_name)))      
+    df = pd.concat(df_list)
+    if data =='stats':
+        df = df.sort_values('most_recent_quarter').drop_duplicates(subset=['symbol'], keep='last')
+    else:
+        df = df.sort_values(['symbol','date']).drop_duplicates(subset=['symbol','date'], keep='last')
+    df.to_csv(os.path.join(output_dir, file_name), index=False)
+
 
 if __name__ == "__main__":
 
-    statistics = clean_statistics("data_sp500/all_stats.csv")
-    financials = clean_financials("data_sp500/all_financials_q.csv")
-    prices = clean_prices("data_sp500/all_prices.csv")
+    for folder in ['data_sp500', 'data_nasdaq', 'data_other']:
+        statistics = clean_statistics(os.path.join(folder, "all_stats.csv"))
+        financials = clean_financials(os.path.join(folder, "all_financials_q.csv"))
+        prices = clean_prices(os.path.join(folder, "all_prices.csv"))
 
-    statistics.to_csv("data_sp500/all_stats_clean.csv", index=False)
-    financials.to_csv("data_sp500/all_financials_clean.csv", index=False)
-    prices.to_csv("data_sp500/all_prices_clean.csv", index=False)
+        statistics.to_csv(os.path.join(folder, "all_stats_clean.csv"), index=False)
+        financials.to_csv(os.path.join(folder, "all_financials_clean.csv"), index=False)
+        prices.to_csv(os.path.join(folder, "all_prices_clean.csv"), index=False)
+
+    for data in  ['stats', 'financials', 'prices']:
+        concat_univ(data)
+
+
+
+
+
+
+
 
