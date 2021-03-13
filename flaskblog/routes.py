@@ -18,14 +18,19 @@ mycursor = mydb.cursor()
 @app.route("/home")
 def home():
     posts = Post.query.all()
-    return render_template('home.html', posts=posts)
-
+    return render_template('database.html', posts=posts)
+    
+@app.route("/blog")
+def blog():
+    posts = Post.query.all()
+    return render_template('blog.html', posts=posts)
 
 @app.route("/about")
 def about():
     return render_template('about.html', title='About')
 
 @app.route("/")
+
 @app.route("/database")
 def database():
     mycursor.execute("SELECT symbol, payout_ratio FROM statistics WHERE symbol='AAPL'")
