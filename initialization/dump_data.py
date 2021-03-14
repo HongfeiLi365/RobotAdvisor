@@ -36,6 +36,7 @@ def main():
 
     mycursor.execute(
         "CREATE TABLE statistics (symbol VARCHAR(10), most_recent_quarter DATE, "
+        "shares_outstanding BIGINT, "
         "payout_ratio FLOAT, profit_margin FLOAT, "
         "operating_margin FLOAT, return_on_assets FLOAT, "
         "return_on_equity FLOAT, revenue_per_share FLOAT, "

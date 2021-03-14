@@ -47,6 +47,7 @@ def clean_prices(file_path):
 def clean_statistics(file_path):
     stats = pd.read_csv(file_path)
     use_cols = ['symbol', 'Most Recent Quarter (mrq)',
+                'Shares Outstanding 5',
                 'Payout Ratio 4', 'Profit Margin',
                 'Operating Margin (ttm)', 'Return on Assets (ttm)',
                 'Return on Equity (ttm)', 'Revenue Per Share (ttm)',
@@ -66,7 +67,7 @@ def clean_statistics(file_path):
     for col in pct_col:
         stats[col] = parse_pct(stats[col])
 
-    num_col = ['ebitda', 'operating_cash_flow']
+    num_col = ['ebitda', 'operating_cash_flow', 'shares_outstanding']
     for col in num_col:
         stats[col] = parse_big_num(stats[col])
 
