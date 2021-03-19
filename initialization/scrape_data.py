@@ -3,7 +3,7 @@ import pandas as pd
 import time
 import os
 import random
-
+from urllib.error import HTTPError
 
 class YahooReader():
     """
@@ -17,26 +17,38 @@ class YahooReader():
         """
         n = 0
         df = None
-        while n < max_tries:
-            try:
-                df = func(ticker)
-                break
-            except ValueError:
-                # Likely invalid symbol so skip ahead
-                print('Yahoo Reader failed to read: ' + ticker)
-                break
-            except KeyError:
-                print("Yahoo Reader failed to read: {} because of Key Error".format(ticker))
-                break
-            except:
-                # Likely failed to connect to Yahoo
-                print('Failed to connect to Yahoo.' +
-                      ' Retry for the {} time.'.format(n+1))
-                time.sleep(3)
-                n += 1
-                if n == max_tries:
-                    raise Exception(
-                        'Could not connect to Yahoo. Please try later.')
+        if len(ticker) > 0:
+            while n < max_tries:
+                try:
+                    df = func(ticker)
+                    break
+                except (ValueError, AssertionError):
+                    # Likely invalid symbol so skip ahead
+                    print('Yahoo Reader failed to read: ' + ticker)
+                    break
+                except KeyError:
+                    print("Yahoo Reader failed to read: {} because of Key Error".format(ticker))
+                    break
+                except IndexError:
+                    print("Yahoo Reader failed to read: {} because of IndexError".format(ticker))
+                    break
+                except HTTPError as err:
+                    if err.code == 404:
+                        print("Yahoo Reader failed to read: {} because of HTTPError 404".format(ticker))
+                        break
+                    else:
+                        pass
+                except:
+                    # Likely failed to connect to Yahoo
+                    # print('Failed to connect to Yahoo.' +
+                    #     ' Retry for the {} time.'.format(n+1))
+                    # time.sleep(3)
+                    # n += 1
+                    # if n == max_tries:
+                    #     raise Exception(
+                    #         'Could not connect to Yahoo. Please try later.')
+                    print("Skip: {}".format(ticker))
+                    break
         return df
 
     def request_stats(self, tickers):
@@ -168,10 +180,10 @@ class YahooReader():
             if prices:
                 self.save_prices_if_not_exist(
                     batch_tickers, batch_folder, force_refresh)
-            time.sleep(random.random()*5+3)
-            if batch_i > 0 and batch_i % 10 == 0:
-                print("Pause for 120 seconds...")
-                time.sleep(120)
+            #time.sleep(random.random()*5+3)
+            # if batch_i > 0 and batch_i % 10 == 0:
+            #     print("Pause for 120 seconds...")
+            #     time.sleep(120)
 
         self.combine_batches(folder_path)
 

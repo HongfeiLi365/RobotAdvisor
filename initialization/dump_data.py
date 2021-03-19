@@ -36,6 +36,7 @@ def main():
 
     mycursor.execute(
         "CREATE TABLE statistics (symbol VARCHAR(10), most_recent_quarter DATE, "
+        "shares_outstanding BIGINT, "
         "payout_ratio FLOAT, profit_margin FLOAT, "
         "operating_margin FLOAT, return_on_assets FLOAT, "
         "return_on_equity FLOAT, revenue_per_share FLOAT, "
@@ -93,9 +94,9 @@ def main():
         "PRIMARY KEY(symbol, date))")
 
 
-    statistics = pd.read_csv("data_sp500/all_stats_clean.csv")
-    financials =  pd.read_csv("data_sp500/all_financials_clean.csv")
-    prices = pd.read_csv("data_sp500/all_prices_clean.csv")
+    statistics = pd.read_csv("data/all_stats_clean.csv")
+    financials =  pd.read_csv("data/all_financials_clean.csv")
+    prices = pd.read_csv("data/all_prices_clean.csv")
 
     insert_dataframe(mydb, statistics, 'statistics')
     insert_dataframe(mydb, financials, 'financials')
