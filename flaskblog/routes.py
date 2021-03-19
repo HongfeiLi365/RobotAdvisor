@@ -6,20 +6,11 @@ from flaskblog import app, bcrypt
 from flaskblog.forms import RegistrationForm, LoginForm, UpdateAccountForm, PostForm
 from flaskblog.models import User, Post
 from flask_login import login_user, current_user, logout_user, login_required
-<<<<<<< Updated upstream
-=======
 from .db_utils import execute_query
->>>>>>> Stashed changes
 
 
-@app.route("/")
 @app.route("/home")
 def home():
-<<<<<<< Updated upstream
-    posts = Post.query.all()
-    return render_template('home.html', posts=posts)
-
-=======
     posts = Post.query_all()
     return render_template('database.html', posts=posts)
 
@@ -27,22 +18,18 @@ def home():
 def blog():
     posts = Post.query_all()
     return render_template('blog.html', posts=posts)
->>>>>>> Stashed changes
 
 @app.route("/about")
 def about():
     return render_template('about.html', title='About')
 
-
-<<<<<<< Updated upstream
-=======
+@app.route("/")
 @app.route("/database")
 def database():
     myresult = execute_query("SELECT symbol, payout_ratio FROM statistics WHERE symbol='AAPL'")
     return render_template('database.html', title='Database', results=myresult)
 #Todo: Change the stuff below so that the user authentication uses regular mysql
 #instead of my sql alchemy
->>>>>>> Stashed changes
 @app.route("/register", methods=['GET', 'POST'])
 def register():
     if current_user.is_authenticated:
