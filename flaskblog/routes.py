@@ -28,8 +28,7 @@ def about():
 def database():
     myresult = execute_query("SELECT symbol, payout_ratio FROM statistics WHERE symbol='AAPL'")
     return render_template('database.html', title='Database', results=myresult)
-#Todo: Change the stuff below so that the user authentication uses regular mysql
-#instead of my sql alchemy
+
 @app.route("/register", methods=['GET', 'POST'])
 def register():
     if current_user.is_authenticated:
@@ -37,7 +36,6 @@ def register():
     form = RegistrationForm()
     if form.validate_on_submit():
         hashed_password = bcrypt.generate_password_hash(form.password.data).decode('utf-8')
-        print("Inside Register", form.username.data)
         User.add_user(username=form.username.data, email=form.email.data, password=hashed_password)
         flash('Your account has been created! You are now able to log in', 'success')
         return redirect(url_for('login'))

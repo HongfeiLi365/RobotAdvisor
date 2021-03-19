@@ -20,6 +20,14 @@ class User(UserMixin):
         return f"User('{self.username}', '{self.email}', '{self.image_file}')"
 
     def _load_row(self, row):
+        """
+        set attributes of itself by values in row
+
+        Parameters
+        ----------
+        row : dict
+            a record from database
+        """
         self.id = row['id']
         self.username = row['username']
         self.email = row['email']
@@ -27,6 +35,15 @@ class User(UserMixin):
         self.image_file = row['image_file']
 
     def get(self, user_id=None, email=None, username=None):
+        """
+        Retrieve a user from database by either user_id, email, or username.
+        Return None if such a user does not exist in database.
+
+        Returns
+        -------
+        User object
+            retrieved user
+        """
         try:
             if user_id is not None:
                 row = execute_query(
@@ -45,6 +62,7 @@ class User(UserMixin):
 
     @classmethod
     def add_user(cls, username, email, password):
+        """Save a new user to database"""
         max_id = execute_query("SELECT max(id) FROM user")[0]['max(id)']
         if max_id == None:
             max_id = 0
@@ -55,6 +73,7 @@ class User(UserMixin):
                 fetch=False)
 
     def update_user(self):
+        """Update a user in database by current attribute values"""
         execute_query(
             "UPDATE user " +
             "SET username='{}', email='{}', image_file='{}' WHERE id='{}'".format(
@@ -74,6 +93,13 @@ class Post():
         return f"Post('{self.title}', '{self.date_posted}')"
 
     def _load_row(self, row):
+        """set attributes of current object
+
+        Parameters
+        ----------
+        row : dict
+            a record from database
+        """
         self.id = row['id']
         self.title = row['title']
         self.date_posted = row['date_posted']
@@ -83,6 +109,12 @@ class Post():
 
     @classmethod
     def query_all(cls):
+        """return all posts in database
+
+        Returns
+        -------
+        list of Post objects
+        """
         rows = execute_query("SELECT * FROM post")
         posts = []
         for row in rows:
@@ -93,6 +125,17 @@ class Post():
 
     @classmethod
     def add_post(cls, title, content, author):
+        """save a new post to database
+
+        Parameters
+        ----------
+        title : str
+            title of post (No special characters please)
+        content : str
+            content of post (No special characters please)
+        author : User object
+            user who created this post
+        """
         max_id = execute_query("SELECT max(id) FROM post")[0]['max(id)']
         if max_id == None:
             max_id = 0
@@ -105,10 +148,27 @@ class Post():
 
     @classmethod
     def delete_post(cls, post):
+        """delete a post from database
+
+        Parameters
+        ----------
+        post : Post object
+            the post to be deleted
+        """
         execute_query("DELETE FROM post WHERE id='{}'".format(post.id),
                       fetch=False)
 
     def get(self, post_id=None):
+        """
+        Retrieve a post from database by id.
+        Return None if such a post does not exist in database.
+
+        Returns
+        -------
+        Post object
+            retrieved post
+        """
+
         try:
             row = execute_query(
                     "SELECT * FROM post WHERE id='{}'".format(post_id))[0]
@@ -118,12 +178,31 @@ class Post():
             return None
 
     def get_or_404(self, post_id, description=None):
+        """
+        Retrieve a post from database, raise NotFound error if post does
+        not exist
+
+        Parameters
+        ----------
+        post_id : int
+            'id' in post table
+        description : str, optional
+            Message to display in NotFound Error, by default None
+
+        Returns
+        -------
+        Post object
+            retrieved post
+        """
         p = self.get(post_id)
         if p is None:
             abort(404, description=description)
         return p
 
     def update_post(self):
+        """
+        Update post title and content in database by current attribute values
+        """
         execute_query(
             "UPDATE post " +
             "SET title='{}', content='{}' WHERE id='{}'".format(
