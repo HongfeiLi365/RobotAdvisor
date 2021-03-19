@@ -13,8 +13,8 @@
         {% for item in results %}
             <tr>
               <th scope="row">{{loop.index}}</th>
-              <td>{{ item[0] }}</td>
-              <td>{{ item[1] }}</td>
+              <td>{{ item['symbol'] }}</td>
+              <td>{{ item['payout_ratio'] }}</td>
             </tr>
         {% endfor %}
     </tbody>
