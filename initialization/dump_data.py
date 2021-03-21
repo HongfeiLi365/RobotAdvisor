@@ -94,13 +94,17 @@ def main():
         "PRIMARY KEY(symbol, date))")
 
 
-    statistics = pd.read_csv("data/all_stats_clean.csv")
-    financials =  pd.read_csv("data/all_financials_clean.csv")
-    prices = pd.read_csv("data/all_prices_clean.csv")
+    statistics = pd.read_csv("data/all_stats_clean.zip")
+    financials =  pd.read_csv("data/all_financials_clean.zip")
 
     insert_dataframe(mydb, statistics, 'statistics')
     insert_dataframe(mydb, financials, 'financials')
-    insert_dataframe(mydb, prices, 'prices', batch_size=10000)
+    del statistics, financials
+
+    for i in range(3):
+        prices = pd.read_csv("data/all_prices_clean_part{}.zip".format(i))
+        insert_dataframe(mydb, prices, 'prices', batch_size=10000)
+        del prices
 
 
 if __name__ == "__main__":
