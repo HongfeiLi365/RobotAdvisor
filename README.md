@@ -6,8 +6,46 @@ CS411 Database System Project. View your current portfolio, and use the Robot to
  * MySQL
  * Neo4j
  * Bootstrap 4
- # Commands I have been using to run the flaskblog
 
+
+# Persistent Session for Flask on AWS EC2
+I created a persistent session named 'robotadvisor' on our EC2 server
+Use the following command to list all sessions.
+```
+tmux ls
+```
+
+Use the following command to create a new persistent session.
+```
+tmux new -s YOUR_SESSION_NAME
+```
+
+# Stop Flask on AWS EC2
+1. Run the following command to connect to session 'robotadvisor' 
+```
+tmux attach -t robotadvisor  
+```
+2. Stop Flask by Ctrl+C
+
+3. Press Ctrl+B, then press D, to detach from the session window
+
+# Run Flask on AWS EC2
+1. run the following commands
+```
+tmux attach -t robotadvisor
+authbind --deep python3 run.py
+```
+2. Press Ctrl+B, then press D, to detach from the session window
+
+Note that venv is not used.
+
+If for some reason authbind throws a error, try running:
+```
+sudo touch /etc/authbind/byport/80
+sudo chmod 777 /etc/authbind/byport/80
+```
+
+# Commands I have been using to run the flaskblog on UIUC VM
 
 
 Instructions to run
