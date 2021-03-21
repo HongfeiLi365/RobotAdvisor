@@ -79,11 +79,6 @@ class User(UserMixin):
             "SET n.username='%s', n.email='%s', n.image_file='%s'" %(str(self.id), self.username, self.email, self.image_file),
                 fetch=False)
 
-if __name__ == '__main__':
-    u = User()
-    u.add_user('haixu1', 'lhaixu1@illinois.edu', '123456')
-    print(u.get(1))
-
 class Post():
     id = None
     title = None
@@ -116,9 +111,10 @@ class Post():
 
         Returns
         -------
-        list of Post objects
+        list of portafolio objects
         """
-        rows = execute_query("SELECT * FROM post")
+        rows = execute_query('MATCH (n:portafolio) RETURN n')
+        rows = rows.data()['n']
         posts = []
         for row in rows:
             p = cls()
@@ -128,25 +124,25 @@ class Post():
 
     @classmethod
     def add_post(cls, title, content, author):
-        """save a new post to database
+        """save a new portafolio to database
 
         Parameters
         ----------
         title : str
-            title of post (No special characters please)
+            name of the portafolio
         content : str
-            content of post (No special characters please)
+            not sure what is it for now
         author : User object
-            user who created this post
+            user who created this portafolio
         """
-        max_id = execute_query("SELECT max(id) FROM post")[0]['max(id)']
+        max_id = execute_query('MATCH (n:portafolio) RETURN max(n.id) as maxid')[0]['maxid']
         if max_id == None:
             max_id = 0
-        execute_query(
-            "INSERT INTO post (id, title, date_posted, content, user_id) " +
-            "VALUES('{}', '{}', '{}', '{}', '{}')".format(
-                max_id+1, title, datetime.utcnow(), content, author.id),
-                fetch=False)
+            execute_query("CREATE CONSTRAINT IF NOT EXISTS ON (n:portafolio) ASSERT n.title IS UNIQUE", fetch=False)
+            execute_query("CREATE CONSTRAINT IF NOT EXISTS ON (n:portafolio) ASSERT n.id IS UNIQUE", fetch=False)
+            
+        execute_query("CREATE (:portafolio {id: %s, title: '%s', date_posted: '%s', content: '%s', user_id: %s})" %(max_id + 1, title, datetime.utcnow(), content, author.id),fetch=False)
+        execute_query("MATCH (a:user), (p:portafolio) WHERE p.id = %s AND a.id = %s AND p.user_id = %s CREATE (a)-[:owns]->(p)"%(max_id + 1, author.id, author.id))
 
 
     @classmethod
@@ -158,23 +154,46 @@ class Post():
         post : Post object
             the post to be deleted
         """
-        execute_query("DELETE FROM post WHERE id='{}'".format(post.id),
-                      fetch=False)
+        execute_query("MATCH (a:user)-[o:owns]->(p:portafolio) WHERE p.id=%s DELETE o"%(post.id), fetch=False)
+        execute_query("MATCH (p:portafolio) WHERE p.id=%s DELETE p"%(post.id), fetch=False)
 
+    @classmethod
+    def add_stock(cls, post_id=None, stock=None):
+        """
+        add the relationship between the portafolio and the stock
+        Parameters
+        ----------
+        post_id: id of the portafolio
+        stock: symbol of a stock
+        """
+        execute_query("MATCH (p:portafolio) WHERE p.id = %s CREATE (p)-[:contains]->(s:stock {symbol:'%s'})"%(post_id, stock))
+
+    @classmethod
+    def delete_stock(cls, post_id=None, stock=None):
+        """
+        delete the relationship between the portafolio and the stock
+        Parameters
+        ----------
+        post_id: id of the portafolio
+        stock: symbol of a stock
+        """
+        execute_query("MATCH (p:portafolio {id:%s})-[r:contains]->(s:stock {symbol:'%s'}) DELETE r"%(post_id, stock))
+        
     def get(self, post_id=None):
         """
-        Retrieve a post from database by id.
+        Retrieve a portafolio from database by id.
         Return None if such a post does not exist in database.
 
         Returns
         -------
         Post object
-            retrieved post
+            retrieved portafolio
         """
-
         try:
             row = execute_query(
-                    "SELECT * FROM post WHERE id='{}'".format(post_id))[0]
+                    "MATCH (p:portafolio) WHERE p.id=%s return p"%(post_id))
+            print(row)
+            row = row[0].data()['p']
             self._load_row(row)
             return self
         except IndexError:
@@ -207,7 +226,20 @@ class Post():
         Update post title and content in database by current attribute values
         """
         execute_query(
-            "UPDATE post " +
-            "SET title='{}', content='{}' WHERE id='{}'".format(
+            "MATCH (p:portafolio) WHERE p.id = %s SET p.title = '%s', p.content = '%s'"%(
                 self.title, self.content, self.id),
                 fetch=False)
+
+if __name__ == '__main__':
+    u = User()
+    u.add_user('haixu1', 'lhaixu1@illinois.edu', '123456')
+    u.add_user('haixu2', 'lhaixu2@illinois.edu', '123456')
+    u.add_user('haixu3', 'lhaixu3@illinois.edu', '123456')
+    print(u.get(1))
+    p = Post()
+    p.add_post("tech", "APPL", u.get(1))
+    p.add_post("energy", "xom", u.get(1))
+    p.delete_post(p.get(2))
+    p.add_stock(1, "APPL")
+    p.add_post("tech", "APPL", u.get(1))
+    print(p.get(1))
