@@ -120,8 +120,19 @@ if __name__ == "__main__":
 
 
 
+    statistics = pd.read_csv("data/all_stats_clean.csv", index_col=[0])
+    financials =  pd.read_csv("data/all_financials_clean.csv")
+    prices = pd.read_csv("data/all_prices_clean.csv")
+
+    inds = statistics.index.intersection(prices['symbol'].unique()).intersection(financials['symbol'])
 
 
+    statistics = statistics.loc[inds]
+    financials = financials[financials['symbol'].isin(inds)]
+    prices = prices[prices['symbol'].isin(inds)]
 
-
-
+    statistics.to_csv("data/all_stats_clean.csv")
+    financials.to_csv("data/all_financials_clean.csv", index=False)
+    batch_size = (len(prices) // 3)+1
+    for i in range(3):
+        prices.iloc[i*batch_size:(i+1)*batch_size].to_csv("data/all_prices_clean_part{}.csv".format(i), index=False)
