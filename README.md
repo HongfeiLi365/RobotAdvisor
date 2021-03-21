@@ -45,6 +45,16 @@ sudo touch /etc/authbind/byport/80
 sudo chmod 777 /etc/authbind/byport/80
 ```
 
+# To initialize MySQL on your own PC for testing purpose
+
+1. Install MySQL, create user and password following prompt during installation. [Tutorial (Ubuntu)](https://www.digitalocean.com/community/tutorials/how-to-install-mysql-on-ubuntu-20-04)
+
+2. Inside initialization folder, run init_user_tables.py to create user and post tables. (Change username and password in the script to whatever you set for MySQL during installation) 
+
+3. Download data files from [Google Drive](https://drive.google.com/drive/folders/1ZbvjXqaLKyHTzSCw0lK9FEPdHQRN3_7S?usp=sharing). Put them under robotadvisor/initialization/data
+
+4. Inside initialization folder, run dump_data.py to create prices, financials, and statistics tables. (Change username and password in the script to whatever you set for MySQL during installation) 
+
 # Commands I have been using to run the flaskblog on UIUC VM
 
 
