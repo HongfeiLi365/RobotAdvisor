@@ -50,7 +50,10 @@ def cypher_command_fetch(tx, command = "MATCH (n) RETURN n limit 10"):
     #print(command)
     result = tx.run(command)
     try: # in case of empty query result
-        return result
+        if result == []:
+            return None
+        else:
+            return result
     except:
         return None
 
