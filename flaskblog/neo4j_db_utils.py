@@ -41,7 +41,10 @@ def execute_query(query, fetch=True, commit=True):
             except:
                 pass
     driver.close()
-    return result
+    if result == []:
+        return None
+    else:
+        return result
 
 def cypher_command_fetch(tx, command = "MATCH (n) RETURN n limit 10"):
     '''
