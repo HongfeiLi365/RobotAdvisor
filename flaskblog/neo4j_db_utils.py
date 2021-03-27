@@ -34,12 +34,12 @@ def execute_query(query, fetch=True, commit=True):
                 result = [record for record in neo4jOutput]
                 #print(result)
             except:
-                pass
+                return None
         else:
             try:
                 session.run(query)#write_transaction(cypher_command)
             except:
-                pass
+                return None
     driver.close()
     return result
 
@@ -50,10 +50,7 @@ def cypher_command_fetch(tx, command = "MATCH (n) RETURN n limit 10"):
     #print(command)
     result = tx.run(command)
     try: # in case of empty query result
-        if result == []:
-            return None
-        else:
-            return result
+        return result
     except:
         return None
 

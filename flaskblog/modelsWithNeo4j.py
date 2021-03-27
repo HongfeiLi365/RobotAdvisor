@@ -1,12 +1,12 @@
 from datetime import datetime
-#from flaskblog import login_manager
+from flaskblog import login_manager
 from flask_login import UserMixin
-from neo4j_db_utils import execute_query
+from .neo4j_db_utils import execute_query
 from flask import abort
 
-#@login_manager.user_loader
-#def load_user(user_id):
-#    return  User().get(user_id = int(user_id))
+@login_manager.user_loader
+def load_user(user_id):
+   return  User().get(user_id = int(user_id))
 
 class User(UserMixin):
     id = None
@@ -44,6 +44,7 @@ class User(UserMixin):
         User object
             retrieved user
         """
+        print(user_id, email, username)
         try:
             if user_id is not None:
                 row = execute_query(
@@ -70,14 +71,14 @@ class User(UserMixin):
             max_id = 0
             execute_query("CREATE CONSTRAINT ON (n:user) ASSERT n.id IS UNIQUE", fetch=False)
             execute_query("CREATE CONSTRAINT ON (n:user) ASSERT n.username IS UNIQUE", fetch=False)
-            execute_query("CREATE CONSTRAINT ON (n:user) ASSERT n.email IS UNIQUE", fetch=False)
         execute_query("CREATE (:user {id: %s, username: '%s', email: '%s', image_file: '%s', password: '%s'})" % (str(max_id+1), username, email, 'default.jpg', password), fetch=False)
 
     def update_user(self):
         """Update a user in database by current attribute values"""
+        print("Inside update")
         execute_query(
-            "MATCH (n:user {id: %s}) " +
-            "SET n.username='%s', n.email='%s', n.image_file='%s'" %(str(self.id), self.username, self.email, self.image_file),
+            "MATCH (n:user {{id: {}}}) ".format(self.id) +
+            "SET n.username='{}', n.email='{}', n.image_file='{}'".format(self.username, self.email, self.image_file),
                 fetch=False)
 
 class Post():
@@ -101,7 +102,7 @@ class Post():
         """
         self.id = row['id']
         self.title = row['title']
-        self.date_posted = row['date_posted']
+        self.date_posted = datetime.strptime(row['date_posted'], '%Y-%m-%d %H:%M:%S.%f')
         self.content = row['content']
         self.user_id = row['user_id']
         self.author = User().get(user_id= row['user_id'])
@@ -115,7 +116,8 @@ class Post():
         list of portafolio objects
         """
         rows = execute_query('MATCH (n:portafolio) RETURN n')
-        posts = []
+        print(rows)
+        posts = []   
         for row in rows:
             row = row.data()['n']
             p = cls()
@@ -226,27 +228,25 @@ class Post():
         """
         Update post title and content in database by current attribute values
         """
+        print("+++++++++++++++++++++")
+        print("post update is called")
+        print("+++++++++++++++++++++")
         execute_query(
             "MATCH (p:portafolio) WHERE p.id = %s SET p.title = '%s', p.content = '%s'"%(
-                self.title, self.content, self.id),
+                self.id, self.title, self.content),
                 fetch=False)
 
 if __name__ == '__main__':
     u = User()
-    u.add_user('haixu1', 'lhaixu1@illinois.edu', '123456')
-    u.add_user('haixu2', 'lhaixu2@illinois.edu', '123456')
-    u.add_user('haixu3', 'lhaixu3@illinois.edu', '123456')
-    print(u.get(None, None, 'haixu5'))
-    print(u.get(3))
-    print(u.get(None, 'lhaixu3@illinois.edu'))
-    print(u.get(None, 'lhaixu4@illinois.edu'))
-    '''
-    p = Post()
-    p.add_post("tech", "APPL", u.get(1))
-    p.add_post("energy", "xom", u.get(1))
+    #u.add_user('haixu1', 'lhaixu1@illinois.edu', '123456')
+    #u.add_user('haixu2', 'lhaixu2@illinois.edu', '123456')
+    #u.add_user('haixu3', 'lhaixu3@illinois.edu', '123456')
+    if u.get(username = 'haixu1'):
+       print('Yes')
+    #p = Post()
+    #p.add_post("tech", "APPL", u.get(1))
+    #p.add_post("energy", "xom", u.get(1))
     #p.delete_post(p.get(2))
-    p.add_stock(1, "APPL")
-    p.add_post("tech", "APPL", u.get(1))
-    print(p.get(1))
-    print(p.query_all())
-    '''
+    #p.add_stock(1, "APPL")
+    #p.add_post("tech", "APPL", u.get(1))
+    #print(p.query_all())
