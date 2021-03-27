@@ -70,6 +70,7 @@ class User(UserMixin):
             max_id = 0
             execute_query("CREATE CONSTRAINT ON (n:user) ASSERT n.id IS UNIQUE", fetch=False)
             execute_query("CREATE CONSTRAINT ON (n:user) ASSERT n.username IS UNIQUE", fetch=False)
+            execute_query("CREATE CONSTRAINT ON (n:user) ASSERT n.email IS UNIQUE", fetch=False)
         execute_query("CREATE (:user {id: %s, username: '%s', email: '%s', image_file: '%s', password: '%s'})" % (str(max_id+1), username, email, 'default.jpg', password), fetch=False)
 
     def update_user(self):
@@ -235,7 +236,11 @@ if __name__ == '__main__':
     u.add_user('haixu1', 'lhaixu1@illinois.edu', '123456')
     u.add_user('haixu2', 'lhaixu2@illinois.edu', '123456')
     u.add_user('haixu3', 'lhaixu3@illinois.edu', '123456')
-    print(u.get(1))
+    print(u.get(None, None, 'haixu5'))
+    print(u.get(3))
+    print(u.get(None, 'lhaixu3@illinois.edu'))
+    print(u.get(None, 'lhaixu4@illinois.edu'))
+    '''
     p = Post()
     p.add_post("tech", "APPL", u.get(1))
     p.add_post("energy", "xom", u.get(1))
@@ -244,3 +249,4 @@ if __name__ == '__main__':
     p.add_post("tech", "APPL", u.get(1))
     print(p.get(1))
     print(p.query_all())
+    '''
