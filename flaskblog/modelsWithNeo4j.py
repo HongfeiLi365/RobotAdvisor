@@ -114,9 +114,9 @@ class Post():
         list of portafolio objects
         """
         rows = execute_query('MATCH (n:portafolio) RETURN n')
-        rows = rows.data()['n']
         posts = []
         for row in rows:
+            row = row.data()['n']
             p = cls()
             p._load_row(row)
             posts.append(p)
@@ -239,7 +239,8 @@ if __name__ == '__main__':
     p = Post()
     p.add_post("tech", "APPL", u.get(1))
     p.add_post("energy", "xom", u.get(1))
-    p.delete_post(p.get(2))
+    #p.delete_post(p.get(2))
     p.add_stock(1, "APPL")
     p.add_post("tech", "APPL", u.get(1))
     print(p.get(1))
+    print(p.query_all())
