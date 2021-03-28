@@ -25,7 +25,7 @@ def execute_query(query, fetch=True, commit=True):
     user = "neo4j"
     password = "fourtune1234"
     driver = GraphDatabase.driver(uri, auth=(user, password))
-    print(query)
+    #print(query)
     result = []
     with driver.session() as session:
         if fetch:
@@ -34,12 +34,12 @@ def execute_query(query, fetch=True, commit=True):
                 result = [record for record in neo4jOutput]
                 #print(result)
             except:
-                pass
+                return None
         else:
             try:
                 session.run(query)#write_transaction(cypher_command)
             except:
-                pass
+                return None
     driver.close()
     return result
 

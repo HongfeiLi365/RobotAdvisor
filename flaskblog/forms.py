@@ -3,7 +3,7 @@ from flask_wtf.file import FileField, FileAllowed
 from flask_login import current_user
 from wtforms import StringField, PasswordField, SubmitField, BooleanField, TextAreaField
 from wtforms.validators import DataRequired, Length, Email, EqualTo, ValidationError
-from flaskblog.models import User
+from flaskblog.modelsWithNeo4j import User
 
 
 class RegistrationForm(FlaskForm):
@@ -46,7 +46,13 @@ class UpdateAccountForm(FlaskForm):
 
     def validate_username(self, username):
         if username.data != current_user.username:
+            print("+++++++++++++++++++")
+            print("before get")
             user = User().get(username=username.data)
+            # changes
+            print("after get")
+            print(user, username.data, current_user.username)
+            # end of changes
             if user:
                 raise ValidationError('That username is taken. Please choose a different one.')
 
