@@ -25,7 +25,7 @@ def execute_query(query, fetch=True, commit=True):
     user = "neo4j"
     password = "fourtune1234"
     driver = GraphDatabase.driver(uri, auth=(user, password))
-    print(query)
+    #print(query)
     result = []
     with driver.session() as session:
         if fetch:

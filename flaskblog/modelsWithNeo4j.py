@@ -44,7 +44,7 @@ class User(UserMixin):
         User object
             retrieved user
         """
-        print(user_id, email, username)
+        #print(user_id, email, username)
         try:
             if user_id is not None:
                 row = execute_query(
@@ -75,7 +75,7 @@ class User(UserMixin):
 
     def update_user(self):
         """Update a user in database by current attribute values"""
-        print("Inside update")
+        #print("Inside update")
         execute_query(
             "MATCH (n:user {{id: {}}}) ".format(self.id) +
             "SET n.username='{}', n.email='{}', n.image_file='{}'".format(self.username, self.email, self.image_file),
@@ -228,25 +228,273 @@ class Post():
         """
         Update post title and content in database by current attribute values
         """
-        print("+++++++++++++++++++++")
-        print("post update is called")
-        print("+++++++++++++++++++++")
+        #print("+++++++++++++++++++++")
+        #print("post update is called")
+        #print("+++++++++++++++++++++")
         execute_query(
             "MATCH (p:portafolio) WHERE p.id = %s SET p.title = '%s', p.content = '%s'"%(
                 self.id, self.title, self.content),
                 fetch=False)
 
+class Portfolio():
+   id = None
+   name = None
+   user_id = None
+   owner = None
+   member = None
+
+   def __repr__(self):
+      return f"Portfolio('{self.name}', '{self.owner.username}', '{self.member}')"
+
+   def _load_row(self, row, stockQuery = None):
+      """
+      set attributes of current object
+      
+      Parameters
+      ----------
+      row : dict
+         a record from database
+      stockQuery: list of neo4j objects
+         contains the symbols of the stocks
+      """
+      self.id = row['id']
+      self.name = row['name']
+      self.user_id = row['user_id']
+      self.owner = User().get(user_id= row['user_id'])
+      self.member = []
+      if stockQuery:
+         for each in stockQuery:
+            self.member = self.member + [Stock().get(symbol = each.data()['n.symbol'])]
+
+   @classmethod
+   def query_all(cls):
+      """return all posts in database
+
+      Returns
+      -------
+      list of portafolio objects
+      """
+      rows = execute_query('MATCH (n:portfolio) RETURN n')
+      #print(rows)
+      portfolios = []   
+      for row in rows:
+         row = row.data()['n']
+         stocks = execute_query('MATCH (p:portfolio)-[:contains]->(n:stock) WHERE p.id=%s RETURN n.symbol'%(row['id']))
+         p = cls()
+         p._load_row(row, stocks)
+         portfolios.append(p)
+      return portfolios
+
+   @classmethod
+   def add_portfolio(cls, name, user):
+      """save a new portafolio to database
+      The query first checks that whether the relationship exits
+      Parameters
+      ----------
+      name : str
+         name of the portafolio
+      user : User object
+         user who created this portafolio
+      """
+      max_id = execute_query('MATCH (n:portfolio) RETURN max(n.id) as maxid')[0]['maxid']
+      if max_id == None:
+         max_id = 0
+         execute_query("CREATE CONSTRAINT IF NOT EXISTS ON (n:portfolio) ASSERT n.name IS UNIQUE", fetch=False)
+         execute_query("CREATE CONSTRAINT IF NOT EXISTS ON (n:portfolio) ASSERT n.id IS UNIQUE", fetch=False)
+            
+      execute_query("CREATE (:portfolio {id: %s, name: '%s', user_id: %s})" %(max_id + 1, name, user.id),fetch=False)
+      if execute_query("MATCH (a:user)-[:owns]->(p:portfolio) WHERE p.id = %s AND a.id = %s AND p.user_id = %s RETURN p"%(max_id + 1, user.id, user.id)) == []:
+         execute_query("MATCH (a:user), (p:portfolio) WHERE p.id = %s AND a.id = %s AND p.user_id = %s CREATE (a)-[:owns]->(p)"%(max_id + 1, user.id, user.id))
+
+   @classmethod
+   def delete_portfolio(cls, portfolio):
+      """delete a portfolio from database
+      
+      Parameters
+      ----------
+      portfolio : Portfolio object
+         the portfolio to be deleted
+      """
+      execute_query("MATCH (a:user)-[o:owns]->(p:portfolio) WHERE p.id=%s DELETE o"%(portfolio.id), fetch=False)
+      execute_query("MATCH (p:portfolio)-[c:contains]->(s:stock) WHERE p.id=%s DELETE c"%(portfolio.id), fetch=False)
+      execute_query("MATCH (p:portfolio) WHERE p.id=%s DELETE p"%(portfolio.id), fetch=False)
+
+   @classmethod
+   def add_stock(cls, portfolio=None, stock=None):
+      """
+      add the relationship between the portafolio and the stock
+      Only execute when the relationship does not exist
+      Parameters
+      ----------
+      portfolio: object
+      stock: object
+      """
+      if execute_query("MATCH (p:portfolio)-[:contains]->(s:stock) WHERE p.id = %s AND s.symbol = '%s' RETURN s"%(portfolio.id, stock.symbol)) == []:
+         execute_query("MATCH (p:portfolio) WHERE p.id = %s CREATE (p)-[:contains]->(s:stock {symbol:'%s'})"%(portfolio.id, stock.symbol))
+
+   @classmethod
+   def delete_stock(cls, portfolio=None, stock=None):
+      """
+      delete the relationship between the portafolio and the stock
+      Parameters
+      ----------
+      portfolio: object
+      stock: object
+      """
+      execute_query("MATCH (p:portfolio {id:%s})-[r:contains]->(s:stock {symbol:'%s'}) DELETE r"%(portfolio.id, stock.symbol))
+
+   def update_portfolio(self):
+      """
+      Update portfolio in database by current attribute values
+      """
+      execute_query("MATCH (p:portfolio) WHERE p.id = %s SET p.name = '%s', p.user_id = %s"%(self.id, self.name, self.user_id), fetch=False)
+
+   def get(self, portfolio_id=None):
+      """
+      Retrieve a portafolio from database by id.
+      Return None if such a post does not exist in database.
+
+      Returns
+      -------
+      Post object
+         retrieved portafolio
+      """
+      try:
+         row = execute_query("MATCH (p:portfolio) WHERE p.id=%s return p"%(portfolio_id))
+         #print(row)
+         row = row[0].data()['p']
+         stocks = execute_query('MATCH (p:portfolio)-[:contains]->(n:stock) WHERE p.id=%s RETURN n.symbol'%(portfolio_id))
+         self._load_row(row, stocks)
+         return self
+      except IndexError:
+         return None
+
+        
+class Stock():
+   symbol = None
+   return_on_assets = None
+   total_debt_to_equity = None
+   operating_cash_flow = None
+   revenue_per_share = None
+   operating_margin = None
+   shares_outstanding = None
+   current_ratio = None
+   ebitda = None
+   quarterly_revenue_growth = None
+   most_recent_quarter = None
+   quarterly_earnings_growth = None
+   return_on_equity = None
+   profit_margin = None
+   diluted_eps = None
+   payout_ratio = None
+   total_cash_per_share = None
+
+   def __repr__(self):
+      return f"Stock('{self.symbol}', '{self.revenue_per_share}')"
+
+   def _load_row(self, row):
+      """
+      set attributes of current object
+
+      Parameters
+      ----------
+      row : dict
+          a record from database
+      """
+      self.symbol = row['symbol']
+      try:
+         self.return_on_assets = row['return_on_assets']
+         self.total_debt_to_equity = row['total_debt_to_equity']
+         self.operating_cash_flow = row['operating_cash_flow']
+         self.revenue_per_share = row['revenue_per_share']
+         self.operating_margin = row['operating_margin']
+         self.shares_outstanding = row['shares_outstanding']
+         self.current_ratio = row['current_ratio']
+         self.ebitda = row['ebitda']
+         self.quarterly_revenue_growth = row['quarterly_revenue_growth']
+         self.most_recent_quarter = row['most_recent_quarter']
+         self.quarterly_earnings_growth = ['quarterly_earnings_growth']
+         self.return_on_equity = ['return_on_equity']
+         self.profit_margin = ['profit_margin']
+         self.diluted_eps = ['diluted_eps']
+         self.payout_ratio = ['payout_ratio']
+         self.total_cash_per_share = ['total_cash_per_share']
+      except:
+         pass
+      
+      
+   def get(self, symbol=None):
+      """
+      Retrieve a stock from database by symbol.
+      Return None if such a post does not exist in database.
+
+      Returns
+      -------
+      Stock object
+          retrieved stock
+      """
+      try:
+         row = execute_query(
+            "MATCH (s:stock) WHERE s.symbol='%s' return s"%(symbol))
+         row = row[0].data()['s']
+         self._load_row(row)
+         return self
+      except IndexError:
+         return None
+      
+        
 if __name__ == '__main__':
-    u = User()
-    #u.add_user('haixu1', 'lhaixu1@illinois.edu', '123456')
-    #u.add_user('haixu2', 'lhaixu2@illinois.edu', '123456')
-    #u.add_user('haixu3', 'lhaixu3@illinois.edu', '123456')
-    if u.get(username = 'haixu1'):
-       print('Yes')
-    #p = Post()
-    #p.add_post("tech", "APPL", u.get(1))
-    #p.add_post("energy", "xom", u.get(1))
-    #p.delete_post(p.get(2))
-    #p.add_stock(1, "APPL")
-    #p.add_post("tech", "APPL", u.get(1))
-    #print(p.query_all())
+   print('+++++++++++++++++++++++++++++++++++++++++++++')
+   print('+++++++++++++clean up database+++++++++++++++')
+   print('+++++++++++++++++++++++++++++++++++++++++++++')
+   execute_query('MATCH (p:portfolio)-[r:contains]->(s:stock) DELETE r')
+   execute_query('MATCH (u:user)-[r:owns]->(p:portfolio) DELETE r')
+   execute_query('MATCH (p:portfolio) DELETE p')
+   execute_query('MATCH (u:user) DELETE u')
+   print('+++++++++++++++++++++++++++++++++++++++++++++')
+   print('+++++++++++++Test user class  +++++++++++++++')
+   print('+++++++++++++++++++++++++++++++++++++++++++++')
+   u = User()
+   u.add_user('haixu1', 'lhaixu1@illinois.edu', '123456')
+   u.add_user('haixu2', 'lhaixu2@illinois.edu', '123456')
+   u.add_user('haixu3', 'lhaixu3@illinois.edu', '123456')
+   print(u.get(1))
+   u.id = 1
+   u.username = 'updated_name'
+   u.update_user()
+   print(u.get(1))
+   print('+++++++++++++++++++++++++++++++++++++++++++++')
+   print('+++++++++++++Test portfolio class++++++++++++')
+   print('+++++++++++++++++++++++++++++++++++++++++++++')
+   p = Portfolio()
+   p.add_portfolio('portfolio1', User().get(1))
+   p.add_stock(p.get(1), Stock().get('BOX'))
+   print(p.query_all())
+   p.add_portfolio('portfolio1', User().get(1))
+   p.add_portfolio('portfolio2', User().get(2))
+   print(p.query_all())
+   p.add_stock(p.get(1), Stock().get('SANA'))
+   p.add_stock(p.get(2), Stock().get('MSFT'))
+   print(p.query_all())
+   p.delete_stock(p.get(1), Stock().get('SANA'))
+   print("before delete p2")
+   print(p.query_all())
+   p.delete_portfolio(p.get(2))
+   print(p.query_all())
+   print("after delete p2")
+   p.id = 1
+   p.name = "updated_port"
+   p.update_portfolio()
+   print(p.query_all())
+   print(p.get(1))
+   
+   print('+++++++++++++++++++++++++++++++++++++++++++++')
+   print('+++++++++++++Test stock class++++++++++++++++')
+   print('+++++++++++++++++++++++++++++++++++++++++++++')
+   s = Stock()
+   print(s.get('SHLS'))
+   print(s.get('XXXX'))
+   print(s.get('BOX'))
+   stocks = execute_query('MATCH (n:stock) RETURN n.symbol LIMIT 3')
+   print(stocks[0].data())
+   
