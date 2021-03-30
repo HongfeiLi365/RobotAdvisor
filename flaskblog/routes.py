@@ -116,15 +116,13 @@ def new_portfolio():
     return render_template('create_portfolio.html', title='New Portfolio',
                            form=form, legend='New Portfolio')
 
-@app.route("/post/<int:post_id>/delete", methods=['POST'])
+@app.route("/post/delete/<int:portfolio_id>", methods=['POST'])
 @login_required
-def delete_portfolio(post_id):
-    post = Post().get_or_404(post_id)
-    if post.author != current_user:
-        abort(403)
-    Post.delete_post(post)
-    flash('Your post has been deleted!', 'success')
-    return redirect(url_for('home'))
+def delete_portfolio(portfolio_id):
+    portfolio = Portfolio().get_or_404(portfolio_id)
+    Portfolio.delete_portfolio(portfolio)
+    flash('Your portfolio has been deleted!', 'success')
+    return redirect(url_for('database'))
 
 @app.route("/post/new", methods=['GET', 'POST'])
 @login_required
