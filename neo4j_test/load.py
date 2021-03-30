@@ -11,7 +11,7 @@ class loadStocks:
         '''
         make connection to the database.
         '''
-        uri = "bolt://172.22.152.21:7687"
+        uri = "bolt://127.0.0.1:7687"
         user = "neo4j"
         password = "fourtune1234"
         self.stockDict = stockDict

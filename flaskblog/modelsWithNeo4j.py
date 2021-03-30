@@ -117,7 +117,7 @@ class Post():
         """
         rows = execute_query('MATCH (n:portafolio) RETURN n')
         print(rows)
-        posts = []   
+        posts = []
         for row in rows:
             row = row.data()['n']
             p = cls()
@@ -143,7 +143,7 @@ class Post():
             max_id = 0
             execute_query("CREATE CONSTRAINT IF NOT EXISTS ON (n:portafolio) ASSERT n.title IS UNIQUE", fetch=False)
             execute_query("CREATE CONSTRAINT IF NOT EXISTS ON (n:portafolio) ASSERT n.id IS UNIQUE", fetch=False)
-            
+
         execute_query("CREATE (:portafolio {id: %s, title: '%s', date_posted: '%s', content: '%s', user_id: %s})" %(max_id + 1, title, datetime.utcnow(), content, author.id),fetch=False)
         execute_query("MATCH (a:user), (p:portafolio) WHERE p.id = %s AND a.id = %s AND p.user_id = %s CREATE (a)-[:owns]->(p)"%(max_id + 1, author.id, author.id))
 
@@ -181,7 +181,7 @@ class Post():
         stock: symbol of a stock
         """
         execute_query("MATCH (p:portafolio {id:%s})-[r:contains]->(s:stock {symbol:'%s'}) DELETE r"%(post_id, stock))
-        
+
     def get(self, post_id=None):
         """
         Retrieve a portafolio from database by id.
@@ -249,7 +249,7 @@ class Portfolio():
    def _load_row(self, row, stockQuery = None):
       """
       set attributes of current object
-      
+
       Parameters
       ----------
       row : dict
@@ -268,7 +268,7 @@ class Portfolio():
 
    @classmethod
    def query_all(cls):
-      """return all posts in database
+      """return all portfolios in database
 
       Returns
       -------
@@ -276,7 +276,7 @@ class Portfolio():
       """
       rows = execute_query('MATCH (n:portfolio) RETURN n')
       #print(rows)
-      portfolios = []   
+      portfolios = []
       for row in rows:
          row = row.data()['n']
          stocks = execute_query('MATCH (p:portfolio)-[:contains]->(n:stock) WHERE p.id=%s RETURN n.symbol'%(row['id']))
@@ -301,7 +301,7 @@ class Portfolio():
          max_id = 0
          execute_query("CREATE CONSTRAINT IF NOT EXISTS ON (n:portfolio) ASSERT n.name IS UNIQUE", fetch=False)
          execute_query("CREATE CONSTRAINT IF NOT EXISTS ON (n:portfolio) ASSERT n.id IS UNIQUE", fetch=False)
-            
+
       execute_query("CREATE (:portfolio {id: %s, name: '%s', user_id: %s})" %(max_id + 1, name, user.id),fetch=False)
       if execute_query("MATCH (a:user)-[:owns]->(p:portfolio) WHERE p.id = %s AND a.id = %s AND p.user_id = %s RETURN p"%(max_id + 1, user.id, user.id)) == []:
          execute_query("MATCH (a:user), (p:portfolio) WHERE p.id = %s AND a.id = %s AND p.user_id = %s CREATE (a)-[:owns]->(p)"%(max_id + 1, user.id, user.id))
@@ -309,7 +309,7 @@ class Portfolio():
    @classmethod
    def delete_portfolio(cls, portfolio):
       """delete a portfolio from database
-      
+
       Parameters
       ----------
       portfolio : Portfolio object
@@ -369,7 +369,12 @@ class Portfolio():
       except IndexError:
          return None
 
-        
+   def get_or_404(self, portfolio_id, description=None):
+       p = self.get(portfolio_id)
+       if p is None:
+           abort(404, description=description)
+       return p
+
 class Stock():
    symbol = None
    return_on_assets = None
@@ -421,8 +426,8 @@ class Stock():
          self.total_cash_per_share = ['total_cash_per_share']
       except:
          pass
-      
-      
+
+
    def get(self, symbol=None):
       """
       Retrieve a stock from database by symbol.
@@ -441,8 +446,8 @@ class Stock():
          return self
       except IndexError:
          return None
-      
-        
+
+
 if __name__ == '__main__':
    print('+++++++++++++++++++++++++++++++++++++++++++++')
    print('+++++++++++++clean up database+++++++++++++++')
@@ -487,7 +492,7 @@ if __name__ == '__main__':
    p.update_portfolio()
    print(p.query_all())
    print(p.get(1))
-   
+
    print('+++++++++++++++++++++++++++++++++++++++++++++')
    print('+++++++++++++Test stock class++++++++++++++++')
    print('+++++++++++++++++++++++++++++++++++++++++++++')
@@ -497,4 +502,3 @@ if __name__ == '__main__':
    print(s.get('BOX'))
    stocks = execute_query('MATCH (n:stock) RETURN n.symbol LIMIT 3')
    print(stocks[0].data())
-   

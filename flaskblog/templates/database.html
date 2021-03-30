@@ -5,16 +5,20 @@
     <thead>
     <tr>
       <th scope="col">#</th>
-      <th scope="col">Ticker Symbol</th>
-      <th scope="col">Payout Ratio</th>
+      <th scope="col">Portfolio Name</th>
+      <th scope="col">ID</th>
+      <th scope="col">Edit</th>
+      <th scope="col">Delete</th>
     </tr>
     </thead>
     <tbody>
         {% for item in results %}
             <tr>
               <th scope="row">{{loop.index}}</th>
-              <td>{{ item['symbol'] }}</td>
-              <td>{{ item['payout_ratio'] }}</td>
+              <td>{{ item['name']}}</td>
+              <td>{{ item['id'] }}</td>
+              <td><a href="{{ url_for('edit_portfolio', portfolio_id=item['id']) }}">Edit<br></a></td>
+              <td><a href="{{ url_for('edit_portfolio', portfolio_id=item['id']) }}">Delete<br></a></td>
             </tr>
         {% endfor %}
     </tbody>

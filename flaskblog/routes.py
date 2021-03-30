@@ -3,16 +3,10 @@ import secrets
 from PIL import Image
 from flask import render_template, url_for, flash, redirect, request, abort
 from flaskblog import app, bcrypt
-from flaskblog.forms import RegistrationForm, LoginForm, UpdateAccountForm, PostForm
-from flaskblog.models import User, Post
+from flaskblog.forms import RegistrationForm, LoginForm, UpdateAccountForm, PostForm, PortfolioForm
+from .modelsWithNeo4j import User, Post, Portfolio
 from flask_login import login_user, current_user, logout_user, login_required
 from .db_utils import execute_query
-
-
-@app.route("/home")
-def home():
-    posts = Post.query_all()
-    return render_template('database.html', posts=posts)
 
 @app.route("/blog")
 def blog():
@@ -24,10 +18,16 @@ def about():
     return render_template('about.html', title='About')
 
 @app.route("/")
+@app.route("/home")
+def home():
+    return render_template('home.html', title='Home')
+
 @app.route("/database")
+@login_required
 def database():
-    myresult = execute_query("SELECT symbol, payout_ratio FROM statistics WHERE symbol='AAPL'")
-    return render_template('database.html', title='Database', results=myresult)
+    if current_user.is_authenticated:
+        allPortfolios = Portfolio.query_all()
+        return render_template('database.html', title='Database', results=allPortfolios)
 
 @app.route("/register", methods=['GET', 'POST'])
 def register():
@@ -98,6 +98,33 @@ def account():
     return render_template('account.html', title='Account',
                            image_file=image_file, form=form)
 
+@app.route("/portfolio/edit/<int:portfolio_id>", methods=['GET','POST'])
+@login_required
+def edit_portfolio(portfolio_id):
+    portfolio = Portfolio().get_or_404(portfolio_id)
+    return render_template('edit_portfolio.html', title=portfolio.name, portfolio = portfolio)
+
+
+@app.route("/portfolio/new", methods=['GET', 'POST'])
+@login_required
+def new_portfolio():
+    form = PortfolioForm()
+    if form.validate_on_submit():
+        Portfolio.add_portfolio(name=form.name.data, user=current_user)
+        flash('Your empty portfolio has been created!', 'success')
+        return redirect(url_for('database'))
+    return render_template('create_portfolio.html', title='New Portfolio',
+                           form=form, legend='New Portfolio')
+
+@app.route("/post/<int:post_id>/delete", methods=['POST'])
+@login_required
+def delete_portfolio(post_id):
+    post = Post().get_or_404(post_id)
+    if post.author != current_user:
+        abort(403)
+    Post.delete_post(post)
+    flash('Your post has been deleted!', 'success')
+    return redirect(url_for('home'))
 
 @app.route("/post/new", methods=['GET', 'POST'])
 @login_required
@@ -106,7 +133,7 @@ def new_post():
     if form.validate_on_submit():
         Post.add_post(title=form.title.data, content=form.content.data, author=current_user)
         flash('Your post has been created!', 'success')
-        return redirect(url_for('home'))
+        return redirect(url_for('blog'))
     return render_template('create_post.html', title='New Post',
                            form=form, legend='New Post')
 
