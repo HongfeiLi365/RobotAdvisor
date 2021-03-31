@@ -422,12 +422,12 @@ class Stock():
          self.ebitda = row['ebitda']
          self.quarterly_revenue_growth = row['quarterly_revenue_growth']
          self.most_recent_quarter = row['most_recent_quarter']
-         self.quarterly_earnings_growth = ['quarterly_earnings_growth']
-         self.return_on_equity = ['return_on_equity']
-         self.profit_margin = ['profit_margin']
-         self.diluted_eps = ['diluted_eps']
-         self.payout_ratio = ['payout_ratio']
-         self.total_cash_per_share = ['total_cash_per_share']
+         self.quarterly_earnings_growth = row['quarterly_earnings_growth']
+         self.return_on_equity = row['return_on_equity']
+         self.profit_margin = row['profit_margin']
+         self.diluted_eps = row['diluted_eps']
+         self.payout_ratio = row['payout_ratio']
+         self.total_cash_per_share = row['total_cash_per_share']
       except:
          pass
 
