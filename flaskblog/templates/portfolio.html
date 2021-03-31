@@ -1,6 +1,6 @@
 {% extends "layout.html" %}
 {% block content %}
-<h1>Database Page</h1>
+<h1>Portfolio Page</h1>
 <table class="table" table-striped>
     <thead>
     <tr>
@@ -14,7 +14,7 @@
         {% for item in results %}
             <tr>
               <th scope="row">{{loop.index}}</th>
-              <td>{{ item['name']}}</td>
+              <td><a href="{{ url_for('edit_portfolio', portfolio_id=item['id']) }}">{{ item['name']}}<br></a></td>
               <td>{{ item['id'] }}</td>
               <td><a href="{{ url_for('edit_portfolio', portfolio_id=item['id']) }}">Details<br></a></td>
             </tr>
@@ -22,5 +22,5 @@
     </tbody>
     </table>
     <a href="{{ url_for('new_portfolio') }}">Click here to add a new Portfolio<br></a>
-    <p>Click on the details link on the table to edit the portfolio. </p>
+    <p>Click on a portfolio's name or the details link on the table to edit the portfolio. </p>
 {% endblock content %}

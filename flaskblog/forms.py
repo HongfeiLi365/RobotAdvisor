@@ -71,3 +71,7 @@ class PostForm(FlaskForm):
 class PortfolioForm(FlaskForm):
     name = StringField('Name of Portfolio', validators=[DataRequired()])
     submit = SubmitField('Submit')
+
+class AddStockToPortfolioForm(FlaskForm):
+    name = StringField('Name of Stock', validators=[DataRequired()])
+    submit = SubmitField('Submit')

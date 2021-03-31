@@ -3,11 +3,13 @@
     <h1>Welcome to the RobotAdvisor. Here are some links to get started.</h1>
     {% if current_user.is_authenticated %}
       <a href="{{ url_for('account') }}">Account<br></a>
-      <a href="{{ url_for('database') }}">Database<br></a>
+      <a href="{{ url_for('portfolio') }}">View Existing Portfolios<br></a>
       <a href="{{ url_for('new_portfolio') }}">New Portfolio<br></a>
+      <a href="{{ url_for('blog') }}">Blog<br></a>
       <a href="{{ url_for('logout') }}">Logout<br></a>
     {% else %}
       <a href="{{ url_for('login') }}">Login<br></a>
       <a href="{{ url_for('register') }}">Register<br></a>
+      <a href="{{ url_for('blog') }}">Blog<br></a>
     {% endif %}
 {% endblock content %}

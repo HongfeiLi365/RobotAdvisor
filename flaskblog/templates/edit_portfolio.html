@@ -12,7 +12,7 @@
 						<a href="#deleteEntirePortfolioModal" class="btn btn-danger" data-toggle="modal"><i class="material-icons">&#xE147;</i> <span>Delete Entire Portfolio</span></a>
 					</div>
 					<div class="col-sm-6">
-						<a href="#addStockModal" class="btn btn-success" data-toggle="modal"><i class="material-icons">&#xE147;</i> <span>Add New Stock</span></a>
+						<a href="{{ url_for('addStockToPortfolio', portfolio_id=portfolio.id) }}" class="btn btn-success"><i class="material-icons">&#xE147;</i> <span>Add New Stock</span></a>
 					</div>
 				</div>
 			</div>
@@ -20,97 +20,29 @@
 				<thead>
 					<tr>
 						<th>#</th>
-						<th>Stock Ticker</th>
-						<th>Price</th>
-						<th>CEO</th>
-						<th>Industry</th>
+						<th>Symbol</th>
+						<th>return_on_assets</th>
+						<th>total_debt_to_equity</th>
+						<th>operating_cash_flow</th>
+						<th>revenue_per_share</th>
+						<th>More Details</th>
 					</tr>
 				</thead>
 				<!-- This section needs to be changed into a loop. It should loop through the Dataframe recieved, and poputlate the table with data -->
 				<tbody>
+					{% for member in portfolio.member %}
 		            <tr>
-		              	<th scope="row">1</th>
-					  	<td>AAPL</td>
-  						<td>2000</td>
-  						<td>Tim Cook</td>
-  						<td>Technology</td>
-  						<td>
-  							<a href="#editStockModal" class="edit" data-toggle="modal"><i class="material-icons" data-toggle="tooltip" title="Edit">&#xE254;</i></a>
-  							<a href="#deleteStockModal" class="delete" data-toggle="modal"><i class="material-icons" data-toggle="tooltip" title="Delete">&#xE872;</i></a>
-  						</td>
+		              	<th scope="row">{{loop.index}}</th>
+						<td><a href="{{ url_for('stockDetails', stock_name=member['symbol'], portfolio_id=portfolio.id) }}">{{member.symbol}}<br></a></td>
+						<td>{{member.return_on_assets}}</td>
+						<td>{{member.total_debt_to_equity}}</td>
+						<td>{{member.operating_cash_flow}}</td>
+						<td>{{member.revenue_per_share}}</td>
+						<td><a href="{{ url_for('stockDetails', stock_name=member['symbol'], portfolio_id=portfolio.id) }}">Details<br></a></td>
 		            </tr>
+					{% endfor %}
 				</tbody>
 			</table>
-		</div>
-	</div>
-</div>
-<!-- Add Modal HTML -->
-<div id="addStockModal" class="modal fade">
-	<div class="modal-dialog">
-		<div class="modal-content">
-			<form>
-				<div class="modal-header">
-					<h4 class="modal-title">Add Stock to Portfolio.</h4>
-					<button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
-				</div>
-				<div class="modal-body">
-					<div class="form-group">
-						<label>Stock Ticker</label>
-						<input type="text" class="form-control" required>
-					</div>
-				</div>
-				<div class="modal-footer">
-					<input type="button" class="btn btn-default" data-dismiss="modal" value="Cancel">
-					<!-- Edit the below line so that it calls the "add to portfolio" function in routes.py.-->
-					<input type="submit" class="btn btn-success" value="Add">
-				</div>
-			</form>
-		</div>
-	</div>
-</div>
-<!-- Edit Modal HTML -->
-<div id="editStockModal" class="modal fade">
-	<div class="modal-dialog">
-		<div class="modal-content">
-			<form>
-				<div class="modal-header">
-					<h4 class="modal-title">Update Stock Ticker</h4>
-					<button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
-				</div>
-				<div class="modal-body">
-					<div class="form-group">
-						<label>Stock Ticker</label>
-						<input type="text" class="form-control" required>
-					</div>
-				</div>
-				<div class="modal-footer">
-					<input type="button" class="btn btn-default" data-dismiss="modal" value="Cancel">
-					<!-- Edit the below line so that it calls the "update portfolio" function in routes.py.-->
-					<input type="submit" class="btn btn-info" value="Save">
-				</div>
-			</form>
-		</div>
-	</div>
-</div>
-<!-- Delete Modal HTML -->
-<div id="deleteStockModal" class="modal fade">
-	<div class="modal-dialog">
-		<div class="modal-content">
-			<form>
-				<div class="modal-header">
-					<h4 class="modal-title">Delete Stock</h4>
-					<button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
-				</div>
-				<div class="modal-body">
-					<p>Are you sure you want to delete this stock from your portfolio?</p>
-					<p class="text-warning"><small>Stocks removed from the portfolio can be added back.</small></p>
-				</div>
-				<div class="modal-footer">
-					<input type="button" class="btn btn-default" data-dismiss="modal" value="Cancel">
-					<!-- Edit the below line so that it calls the "delete stock from portfolio" function in the routes.-->
-					<input type="submit" class="btn btn-danger" value="Delete">
-				</div>
-			</form>
 		</div>
 	</div>
 </div>
