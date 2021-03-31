@@ -1,0 +1,83 @@
+{% extends "layout.html" %}
+{% block content %}
+<div class="container-xl">
+	<div class="table-responsive">
+		<div class="table-wrapper">
+			<div class="table-title">
+				<div class="row">
+					<div class="col-sm-6">
+						<h2>Details - {{stock.symbol}}</h2>
+					</div>
+					<div class="col-sm-6">
+						<a href="#deleteFromPortfolioModal" class="btn btn-danger" data-toggle="modal"><i class="material-icons">&#xE147;</i> <span>Delete Stock From Portfolio</span></a>
+					</div>
+				</div>
+			</div>
+			<table class="table table-striped table-hover">
+				<thead>
+					<tr>
+						<th>Symbol</th>
+						<th>return_on_assets</th>
+						<th>total_debt_to_equity</th>
+						<th>operating_cash_flow</th>
+						<th>operating_margin</th>
+						<th>shares_outstanding</th>
+						<th>current_ratio</th>
+						<th>ebitha</th>
+						<th>quarterly_revenue_growth</th>
+						<th>most_recent_quarter</th>
+						<th>quarterly_earnings_growth</th>
+						<th>return_on_equity</th>
+						<th>profit_margin</th>
+						<th>diluted_eps</th>
+						<th>payout_ratio</th>
+						<th>total_cash_per_share</th>
+						<th>revenue_per_share</th>
+					</tr>
+				</thead>
+				<!-- This section needs to be changed into a loop. It should loop through the Dataframe recieved, and poputlate the table with data -->
+				<tbody>
+		            <tr>
+						<td>{{stock.symbol}}</td>
+						<td>{{stock.return_on_assets}}</td>
+						<td>{{stock.total_debt_to_equity}}</td>
+						<td>{{stock.operating_cash_flow}}</td>
+						<td>{{stock.operating_margin}}</td>
+						<td>{{stock.shares_outstanding}}</td>
+						<td>{{stock.current_ratio}}</td>
+						<td>{{stock.ebitda}}</td>
+						<td>{{stock.quarterly_revenue_growth}}</td>
+						<td>{{stock.most_recent_quarter}}</td>
+						<td>{{stock.quarterly_earnings_growth}}</td>
+						<td>{{stock.return_on_equity}}</td>
+						<td>{{stock.profit_margin}}</td>
+						<td>{{stock.diluted_eps}}</td>
+						<td>{{stock.payout_ratio}}</td>
+						<td>{{stock.total_cash_per_share}}</td>
+						<td>{{stock.revenue_per_share}}</td>
+		            </tr>
+				</tbody>
+			</table>
+		</div>
+	</div>
+</div>
+<!-- Modal -->
+<div class="modal fade" id="deleteFromPortfolioModal" tabindex="-1" role="dialog" aria-labelledby="deleteFromPortfolioModal" aria-hidden="true">
+  <div class="modal-dialog" role="document">
+	<div class="modal-content">
+	  <div class="modal-header">
+		<h5 class="modal-title" id="deleteFromPortfolioModal">Are you sure you want to delete this stock from the portfolio?</h5>
+		<button type="button" class="close" data-dismiss="modal" aria-label="Close">
+		  <span aria-hidden="true">&times;</span>
+		</button>
+	  </div>
+	  <div class="modal-footer">
+		<button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+		<form action="{{ url_for('deleteFromPortfolio', stock_name = stock.symbol, portfolio_id=portfolio_id)}}" method="POST">
+		  <input class="btn btn-danger" type="submit" value="Delete">
+		</form>
+	  </div>
+	</div>
+  </div>
+</div>
+{% endblock content %}

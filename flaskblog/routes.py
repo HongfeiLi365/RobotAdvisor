@@ -3,16 +3,10 @@ import secrets
 from PIL import Image
 from flask import render_template, url_for, flash, redirect, request, abort
 from flaskblog import app, bcrypt
-from flaskblog.forms import RegistrationForm, LoginForm, UpdateAccountForm, PostForm
-from flaskblog.models import User, Post
+from flaskblog.forms import RegistrationForm, LoginForm, UpdateAccountForm, PostForm, PortfolioForm, AddStockToPortfolioForm
+from .modelsWithNeo4j import User, Post, Portfolio, Stock
 from flask_login import login_user, current_user, logout_user, login_required
 from .db_utils import execute_query
-
-
-@app.route("/home")
-def home():
-    posts = Post.query_all()
-    return render_template('database.html', posts=posts)
 
 @app.route("/blog")
 def blog():
@@ -24,10 +18,16 @@ def about():
     return render_template('about.html', title='About')
 
 @app.route("/")
-@app.route("/database")
-def database():
-    myresult = execute_query("SELECT symbol, payout_ratio FROM statistics WHERE symbol='AAPL'")
-    return render_template('database.html', title='Database', results=myresult)
+@app.route("/home")
+def home():
+    return render_template('home.html', title='Home')
+
+@app.route("/portfolio")
+@login_required
+def portfolio():
+    if current_user.is_authenticated:
+        allPortfolios = Portfolio.query_all()
+        return render_template('portfolio.html', title='Portfolio', results=allPortfolios)
 
 @app.route("/register", methods=['GET', 'POST'])
 def register():
@@ -98,6 +98,60 @@ def account():
     return render_template('account.html', title='Account',
                            image_file=image_file, form=form)
 
+@app.route("/portfolio/edit/<int:portfolio_id>", methods=['GET','POST'])
+@login_required
+def edit_portfolio(portfolio_id):
+    portfolio = Portfolio().get_or_404(portfolio_id)
+    return render_template('edit_portfolio.html', title=portfolio.name, portfolio = portfolio)
+
+
+@app.route("/portfolio/new", methods=['GET', 'POST'])
+@login_required
+def new_portfolio():
+    form = PortfolioForm()
+    if form.validate_on_submit():
+        Portfolio.add_portfolio(name=form.name.data, user=current_user)
+        flash('Your empty portfolio has been created!', 'success')
+        return redirect(url_for('portfolio'))
+    return render_template('create_portfolio.html', title='New Portfolio',
+                           form=form, legend='New Portfolio')
+
+@app.route("/post/delete/<int:portfolio_id>", methods=['POST'])
+@login_required
+def delete_portfolio(portfolio_id):
+    portfolio = Portfolio().get_or_404(portfolio_id)
+    Portfolio.delete_portfolio(portfolio)
+    flash('Your portfolio has been deleted!', 'success')
+    return redirect(url_for('portfolio'))
+
+@app.route("/portfolio/addStock/<int:portfolio_id>", methods=['GET', 'POST'])
+@login_required
+def addStockToPortfolio(portfolio_id):
+    form = AddStockToPortfolioForm()
+    m_Portfolio = Portfolio().get_or_404(portfolio_id)
+    m_Stock = Stock().get(symbol=form.name.data)
+    if form.validate_on_submit():
+        Portfolio.add_stock(portfolio=m_Portfolio, stock=m_Stock)
+        flash('Stock has been added', 'success')
+        return redirect(url_for('edit_portfolio', portfolio_id=portfolio_id))
+    return render_template('addStock.html', title='Add Stock',
+                           form=form, legend='Add Stock to Portfolio')
+
+@app.route("/portfolio/Stock/details/<string:stock_name>/<int:portfolio_id>", methods=['GET', 'POST'])
+def stockDetails(stock_name, portfolio_id):
+    m_Stock = Stock().get(symbol=stock_name)
+    m_title = "Details +" + m_Stock.symbol
+    return render_template('stock_details.html', title=m_title, stock=m_Stock, portfolio_id=portfolio_id)
+
+@app.route("/portfolio/Stock/delete/<string:stock_name>/<int:portfolio_id>", methods=['POST'])
+@login_required
+def deleteFromPortfolio(stock_name, portfolio_id):
+    m_Portfolio = Portfolio().get_or_404(portfolio_id)
+    m_Stock = Stock().get(symbol=stock_name)
+    Portfolio.delete_stock(portfolio=m_Portfolio, stock=m_Stock)
+
+    flash('Removed from portfolio!', 'success')
+    return redirect(url_for('edit_portfolio', portfolio_id=portfolio_id))
 
 @app.route("/post/new", methods=['GET', 'POST'])
 @login_required
@@ -106,7 +160,7 @@ def new_post():
     if form.validate_on_submit():
         Post.add_post(title=form.title.data, content=form.content.data, author=current_user)
         flash('Your post has been created!', 'success')
-        return redirect(url_for('home'))
+        return redirect(url_for('blog'))
     return render_template('create_post.html', title='New Post',
                            form=form, legend='New Post')
 
