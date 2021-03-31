@@ -329,9 +329,13 @@ class Portfolio():
       portfolio: object
       stock: object
       """
-      if execute_query("MATCH (p:portfolio)-[:contains]->(s:stock) WHERE p.id = %s AND s.symbol = '%s' RETURN s"%(portfolio.id, stock.symbol)) == []:
-         execute_query("MATCH (p:portfolio) WHERE p.id = %s CREATE (p)-[:contains]->(s:stock {symbol:'%s'})"%(portfolio.id, stock.symbol))
-
+      try:
+         if execute_query("MATCH (p:portfolio)-[:contains]->(s:stock) WHERE p.id = %s AND s.symbol = '%s' RETURN s"%(portfolio.id, stock.symbol)) == []:
+            execute_query("MATCH (p:portfolio) WHERE p.id = %s CREATE (p)-[:contains]->(s:stock {symbol:'%s'})"%(portfolio.id, stock.symbol))
+      except:
+         print('Stock cannot be added')
+         pass
+         
    @classmethod
    def delete_stock(cls, portfolio=None, stock=None):
       """
