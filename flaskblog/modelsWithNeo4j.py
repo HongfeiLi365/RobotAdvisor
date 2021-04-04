@@ -1,12 +1,12 @@
 from datetime import datetime
-from flaskblog import login_manager
+#from flaskblog import login_manager
 from flask_login import UserMixin
-from .neo4j_db_utils import execute_query
+from neo4j_db_utils import execute_query
 from flask import abort
 
-@login_manager.user_loader
-def load_user(user_id):
-   return  User().get(user_id = int(user_id))
+#@login_manager.user_loader
+#def load_user(user_id):
+#   return  User().get(user_id = int(user_id))
 
 class User(UserMixin):
     id = None
@@ -237,56 +237,56 @@ class Post():
                 fetch=False)
 
 class Portfolio():
-   id = None
-   name = None
-   user_id = None
-   owner = None
-   member = None
+    id = None
+    name = None
+    user_id = None
+    owner = None
+    member = None
 
-   def __repr__(self):
-      return f"Portfolio('{self.name}', '{self.owner.username}', '{self.member}')"
+    def __repr__(self):
+        return f"Portfolio('{self.name}', '{self.owner.username}', '{self.member}')"
 
-   def _load_row(self, row, stockQuery = None):
-      """
-      set attributes of current object
+    def _load_row(self, row, stockQuery = None):
+        """
+        set attributes of current object
 
-      Parameters
-      ----------
-      row : dict
-         a record from database
-      stockQuery: list of neo4j objects
-         contains the symbols of the stocks
-      """
-      self.id = row['id']
-      self.name = row['name']
-      self.user_id = row['user_id']
-      self.owner = User().get(user_id= row['user_id'])
-      self.member = []
-      if stockQuery:
-         for each in stockQuery:
-            self.member = self.member + [Stock().get(symbol = each.data()['n.symbol'])]
+        Parameters
+        ----------
+        row : dict
+            a record from database
+        stockQuery: list of neo4j objects
+            contains the symbols of the stocks
+        """
+        self.id = row['id']
+        self.name = row['name']
+        self.user_id = row['user_id']
+        self.owner = User().get(user_id= row['user_id'])
+        self.member = []
+        if stockQuery:
+            for each in stockQuery:
+                self.member = self.member + [Stock().get(symbol = each.data()['n.symbol'])]
 
-   @classmethod
-   def query_all(cls):
-      """return all portfolios in database
+    @classmethod
+    def query_all(cls):
+        """return all portfolios in database
 
-      Returns
-      -------
-      list of portafolio objects
-      """
-      rows = execute_query('MATCH (n:portfolio) RETURN n')
-      #print(rows)
-      portfolios = []
-      for row in rows:
-         row = row.data()['n']
-         stocks = execute_query('MATCH (p:portfolio)-[:contains]->(n:stock) WHERE p.id=%s RETURN n.symbol'%(row['id']))
-         p = cls()
-         p._load_row(row, stocks)
-         portfolios.append(p)
-      return portfolios
+        Returns
+        -------
+        list of portafolio objects
+        """
+        rows = execute_query('MATCH (n:portfolio) RETURN n')
+        #print(rows)
+        portfolios = []
+        for row in rows:
+            row = row.data()['n']
+            stocks = execute_query('MATCH (p:portfolio)-[:contains]->(n:stock) WHERE p.id=%s RETURN n.symbol'%(row['id']))
+            p = cls()
+            p._load_row(row, stocks)
+            portfolios.append(p)
+        return portfolios
     
     @classmethod
-     def query_all_by_user(cls, user = User().get(1)):
+    def query_all_by_user(cls, user = User().get(1)):
         """return all portfolios in database of a specific user
         Parameters
         -------
@@ -307,29 +307,29 @@ class Portfolio():
             portfolios.append(p)
         return portfolios
 
-   @classmethod
-   def add_portfolio(cls, name, user):
-      """save a new portafolio to database
-      The query first checks that whether the relationship exits
-      Parameters
-      ----------
-      name : str
-         name of the portafolio
-      user : User object
-         user who created this portafolio
-      """
-      max_id = execute_query('MATCH (n:portfolio) RETURN max(n.id) as maxid')[0]['maxid']
-      if max_id == None:
-         max_id = 0
-         execute_query("CREATE CONSTRAINT IF NOT EXISTS ON (n:portfolio) ASSERT n.name IS UNIQUE", fetch=False)
-         execute_query("CREATE CONSTRAINT IF NOT EXISTS ON (n:portfolio) ASSERT n.id IS UNIQUE", fetch=False)
+    @classmethod
+    def add_portfolio(cls, name, user):
+        """save a new portafolio to database
+        The query first checks that whether the relationship exits
+        Parameters
+        ----------
+        name : str
+          name of the portafolio
+        user : User object
+          user who created this portafolio
+        """
+        max_id = execute_query('MATCH (n:portfolio) RETURN max(n.id) as maxid')[0]['maxid']
+        if max_id == None:
+            max_id = 0
+            execute_query("CREATE CONSTRAINT IF NOT EXISTS ON (n:portfolio) ASSERT n.name IS UNIQUE", fetch=False)
+            execute_query("CREATE CONSTRAINT IF NOT EXISTS ON (n:portfolio) ASSERT n.id IS UNIQUE", fetch=False)
 
-      execute_query("CREATE (:portfolio {id: %s, name: '%s', user_id: %s})" %(max_id + 1, name, user.id),fetch=False)
-      if execute_query("MATCH (a:user)-[:owns]->(p:portfolio) WHERE p.id = %s AND a.id = %s AND p.user_id = %s RETURN p"%(max_id + 1, user.id, user.id)) == []:
-         execute_query("MATCH (a:user), (p:portfolio) WHERE p.id = %s AND a.id = %s AND p.user_id = %s CREATE (a)-[:owns]->(p)"%(max_id + 1, user.id, user.id))
+        execute_query("CREATE (:portfolio {id: %s, name: '%s', user_id: %s})" %(max_id + 1, name, user.id),fetch=False)
+        if execute_query("MATCH (a:user)-[:owns]->(p:portfolio) WHERE p.id = %s AND a.id = %s AND p.user_id = %s RETURN p"%(max_id + 1, user.id, user.id)) == []:
+            execute_query("MATCH (a:user), (p:portfolio) WHERE p.id = %s AND a.id = %s AND p.user_id = %s CREATE (a)-[:owns]->(p)"%(max_id + 1, user.id, user.id))
 
-   @classmethod
-   def delete_portfolio(cls, portfolio):
+    @classmethod
+    def delete_portfolio(cls, portfolio):
       """delete a portfolio from database
 
       Parameters
@@ -341,8 +341,8 @@ class Portfolio():
       execute_query("MATCH (p:portfolio)-[c:contains]->(s:stock) WHERE p.id=%s DELETE c"%(portfolio.id), fetch=False)
       execute_query("MATCH (p:portfolio) WHERE p.id=%s DELETE p"%(portfolio.id), fetch=False)
 
-   @classmethod
-   def add_stock(cls, portfolio=None, stock=None):
+    @classmethod
+    def add_stock(cls, portfolio=None, stock=None):
       """
       add the relationship between the portafolio and the stock
       Only execute when the relationship does not exist
@@ -381,7 +381,7 @@ class Portfolio():
 
     @classmethod
     def delete_stock(cls, portfolio=None, stock=None):
-         """
+        """
         delete the relationship between the portafolio and the stock
         Parameters
         ----------
@@ -390,37 +390,37 @@ class Portfolio():
         """
         execute_query("MATCH (p:portfolio {id:%s})-[r:contains]->(s:stock {symbol:'%s'}) DELETE r"%(portfolio.id, stock.symbol))
 
-   def update_portfolio(self):
-      """
-      Update portfolio in database by current attribute values
-      """
-      execute_query("MATCH (p:portfolio) WHERE p.id = %s SET p.name = '%s', p.user_id = %s"%(self.id, self.name, self.user_id), fetch=False)
+    def update_portfolio(self):
+        """
+        Update portfolio in database by current attribute values
+        """
+        execute_query("MATCH (p:portfolio) WHERE p.id = %s SET p.name = '%s', p.user_id = %s"%(self.id, self.name, self.user_id), fetch=False)
 
-   def get(self, portfolio_id=None):
-      """
-      Retrieve a portafolio from database by id.
-      Return None if such a post does not exist in database.
+    def get(self, portfolio_id=None):
+        """
+        Retrieve a portafolio from database by id.
+        Return None if such a post does not exist in database.
 
-      Returns
-      -------
-      Post object
-         retrieved portafolio
-      """
-      try:
-         row = execute_query("MATCH (p:portfolio) WHERE p.id=%s return p"%(portfolio_id))
-         #print(row)
-         row = row[0].data()['p']
-         stocks = execute_query('MATCH (p:portfolio)-[:contains]->(n:stock) WHERE p.id=%s RETURN n.symbol'%(portfolio_id))
-         self._load_row(row, stocks)
-         return self
-      except IndexError:
-         return None
+        Returns
+        -------
+        Post object
+            retrieved portafolio
+        """
+        try:
+            row = execute_query("MATCH (p:portfolio) WHERE p.id=%s return p"%(portfolio_id))
+            #print(row)
+            row = row[0].data()['p']
+            stocks = execute_query('MATCH (p:portfolio)-[:contains]->(n:stock) WHERE p.id=%s RETURN n.symbol'%(portfolio_id))
+            self._load_row(row, stocks)
+            return self
+        except IndexError:
+            return None
 
-   def get_or_404(self, portfolio_id, description=None):
-       p = self.get(portfolio_id)
-       if p is None:
-           abort(404, description=description)
-       return p
+    def get_or_404(self, portfolio_id, description=None):
+        p = self.get(portfolio_id)
+        if p is None:
+            abort(404, description=description)
+        return p
 
 class Stock():
    symbol = None
@@ -525,7 +525,8 @@ if __name__ == '__main__':
    p.add_portfolio('portfolio1', User().get(1))
    p.add_portfolio('portfolio2', User().get(2))
    print(p.query_all())
-   p.add_stock(p.get(1), Stock().get('SANA'))
+   print(p.query_all_by_user())
+   print(p.add_stock(p.get(1), Stock().get('SANA')))
    p.add_stock(p.get(2), Stock().get('MSFT'))
    print(p.query_all())
    p.delete_stock(p.get(1), Stock().get('SANA'))
