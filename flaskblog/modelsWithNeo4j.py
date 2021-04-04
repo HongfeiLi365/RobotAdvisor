@@ -1,12 +1,12 @@
 from datetime import datetime
-#from flaskblog import login_manager
+from flaskblog import login_manager
 from flask_login import UserMixin
-from neo4j_db_utils import execute_query
+from .neo4j_db_utils import execute_query
 from flask import abort
 
-#@login_manager.user_loader
-#def load_user(user_id):
-#   return  User().get(user_id = int(user_id))
+@login_manager.user_loader
+def load_user(user_id):
+   return  User().get(user_id = int(user_id))
 
 class User(UserMixin):
     id = None
@@ -526,6 +526,7 @@ if __name__ == '__main__':
    p.add_portfolio('portfolio2', User().get(2))
    print(p.query_all())
    print(p.query_all_by_user())
+   print(p.recommend_stocks())
    print(p.add_stock(p.get(1), Stock().get('SANA')))
    p.add_stock(p.get(2), Stock().get('MSFT'))
    print(p.query_all())
