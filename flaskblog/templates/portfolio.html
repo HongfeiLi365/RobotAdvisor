@@ -1,13 +1,12 @@
 {% extends "layout.html" %}
 {% block content %}
-<h1>Portfolio Page</h1>
+<h1>Your Portfolios</h1>
 <table class="table" table-striped>
     <thead>
     <tr>
       <th scope="col">#</th>
       <th scope="col">Portfolio Name</th>
-      <th scope="col">ID</th>
-      <th scope="col">Edit</th>
+      <th scope="col">Details</th>
     </tr>
     </thead>
     <tbody>
@@ -15,7 +14,6 @@
             <tr>
               <th scope="row">{{loop.index}}</th>
               <td><a href="{{ url_for('edit_portfolio', portfolio_id=item['id']) }}">{{ item['name']}}<br></a></td>
-              <td>{{ item['id'] }}</td>
               <td><a href="{{ url_for('edit_portfolio', portfolio_id=item['id']) }}">Details<br></a></td>
             </tr>
         {% endfor %}

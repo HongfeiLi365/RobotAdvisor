@@ -26,8 +26,10 @@ def home():
 @login_required
 def portfolio():
     if current_user.is_authenticated:
-        allPortfolios = Portfolio.query_all()
-        return render_template('portfolio.html', title='Portfolio', results=allPortfolios)
+        userPortfolios = Portfolio.query_all_by_user(user = current_user)
+        if(len(userPortfolios) < 1):
+            flash("You have no portfolios. Please click the link below to create a portfolio.",'info')
+        return render_template('portfolio.html', title='Portfolio', results=userPortfolios)
 
 @app.route("/register", methods=['GET', 'POST'])
 def register():
@@ -102,6 +104,8 @@ def account():
 @login_required
 def edit_portfolio(portfolio_id):
     portfolio = Portfolio().get_or_404(portfolio_id)
+    if (len(portfolio.member)<1):
+        flash('You have no stocks in this portfolio', 'info')
     return render_template('edit_portfolio.html', title=portfolio.name, portfolio = portfolio)
 
 
@@ -129,10 +133,12 @@ def delete_portfolio(portfolio_id):
 def addStockToPortfolio(portfolio_id):
     form = AddStockToPortfolioForm()
     m_Portfolio = Portfolio().get_or_404(portfolio_id)
-    m_Stock = Stock().get(symbol=form.name.data)
     if form.validate_on_submit():
-        Portfolio.add_stock(portfolio=m_Portfolio, stock=m_Stock)
-        flash('Stock has been added', 'success')
+        m_Stock = Stock().get(symbol=form.name.data.upper())
+        if (Portfolio.add_stock(portfolio=m_Portfolio, stock=m_Stock)):
+            flash('Stock has been added', 'success')
+        else:
+            flash('Error! Stock not present in database', 'danger')
         return redirect(url_for('edit_portfolio', portfolio_id=portfolio_id))
     return render_template('addStock.html', title='Add Stock',
                            form=form, legend='Add Stock to Portfolio')
