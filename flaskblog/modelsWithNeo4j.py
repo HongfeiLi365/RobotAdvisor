@@ -284,6 +284,28 @@ class Portfolio():
          p._load_row(row, stocks)
          portfolios.append(p)
       return portfolios
+    
+    @classmethod
+     def query_all_by_user(cls, user = User().get(1)):
+        """return all portfolios in database of a specific user
+        Parameters
+        -------
+        user object
+
+        Returns
+        -------
+        list of portafolio objects
+        """
+        rows = execute_query('MATCH (n:portfolio) WHERE n.user_id = %s RETURN n'%(user.id))
+        #print(rows)
+        portfolios = []
+        for row in rows:
+            row = row.data()['n']
+            stocks = execute_query('MATCH (p:portfolio)-[:contains]->(n:stock) WHERE p.id=%s RETURN n.symbol'%(row['id']))
+            p = cls()
+            p._load_row(row, stocks)
+            portfolios.append(p)
+        return portfolios
 
    @classmethod
    def add_portfolio(cls, name, user):
@@ -328,24 +350,45 @@ class Portfolio():
       ----------
       portfolio: object
       stock: object
+
+      return
+      ----------
+      false if the stock does not exist
+      true: successfully inserted, or the stock has been inserted before insertion
       """
       try:
-         if execute_query("MATCH (p:portfolio)-[:contains]->(s:stock) WHERE p.id = %s AND s.symbol = '%s' RETURN s"%(portfolio.id, stock.symbol)) == []:
+        if execute_query("MATCH (p:portfolio)-[:contains]->(s:stock) WHERE p.id = %s AND s.symbol = '%s' RETURN s"%(portfolio.id, stock.symbol)) == []:
             execute_query("MATCH (p:portfolio) WHERE p.id = %s CREATE (p)-[:contains]->(s:stock {symbol:'%s'})"%(portfolio.id, stock.symbol))
+        return True
       except:
-         print('Stock cannot be added')
-         pass
-         
-   @classmethod
-   def delete_stock(cls, portfolio=None, stock=None):
-      """
-      delete the relationship between the portafolio and the stock
-      Parameters
-      ----------
-      portfolio: object
-      stock: object
-      """
-      execute_query("MATCH (p:portfolio {id:%s})-[r:contains]->(s:stock {symbol:'%s'}) DELETE r"%(portfolio.id, stock.symbol))
+        print('Stock cannot be added')
+        return False
+        pass
+
+    @classmethod
+    def recommend_stocks(cls, n=3):
+        """
+        return stocks based on current stocks in the portfolio
+        parameter
+        ---------
+        number of stocks to be returned
+
+        return
+        ---------
+        list of stocks objects
+        """
+        return [Stock().get('AAPL'), Stock().get('MSFT'), Stock().get('AMZN'), Stock().get('GOOG'), Stock().get('FB')][:n]
+
+    @classmethod
+    def delete_stock(cls, portfolio=None, stock=None):
+         """
+        delete the relationship between the portafolio and the stock
+        Parameters
+        ----------
+        portfolio: object
+        stock: object
+        """
+        execute_query("MATCH (p:portfolio {id:%s})-[r:contains]->(s:stock {symbol:'%s'}) DELETE r"%(portfolio.id, stock.symbol))
 
    def update_portfolio(self):
       """
