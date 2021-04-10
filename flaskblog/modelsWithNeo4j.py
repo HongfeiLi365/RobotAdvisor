@@ -4,8 +4,8 @@ from flask_login import UserMixin
 from .neo4j_db_utils import execute_query
 from flask import abort
 import sys
-sys.path.append('../recommendation')
-import recommend as rc
+# sys.path.append('../recommendation')
+# import recommend as rc
 
 @login_manager.user_loader
 def load_user(user_id):
@@ -287,7 +287,7 @@ class Portfolio():
             p._load_row(row, stocks)
             portfolios.append(p)
         return portfolios
-    
+
     @classmethod
     def query_all_by_user(cls, user = User().get(1)):
         """return all portfolios in database of a specific user
