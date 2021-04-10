@@ -124,7 +124,7 @@ class Post():
             p = cls()
             p._load_row(row)
             posts.append(p)
-        return posts
+        return posts[::-1]
 
     @classmethod
     def add_post(cls, title, content, author):
