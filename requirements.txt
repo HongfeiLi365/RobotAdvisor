@@ -1,3 +1,5 @@
+sklearn
+neo4j
 flask
 yahoo_fin
 html5lib
