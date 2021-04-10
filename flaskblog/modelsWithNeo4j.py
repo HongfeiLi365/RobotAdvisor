@@ -3,6 +3,9 @@ from flaskblog import login_manager
 from flask_login import UserMixin
 from .neo4j_db_utils import execute_query
 from flask import abort
+import sys
+sys.path.append('../recommendation')
+import recommend as rc
 
 @login_manager.user_loader
 def load_user(user_id):
@@ -366,18 +369,30 @@ class Portfolio():
         pass
 
     @classmethod
-    def recommend_stocks(cls, n=3):
+    def recommend_stocks(cls, portfolio = None, n=3):
         """
         return stocks based on current stocks in the portfolio
         parameter
         ---------
+        portfolio object
         number of stocks to be returned
 
         return
         ---------
         list of stocks objects
         """
-        return [Stock().get('AAPL'), Stock().get('MSFT'), Stock().get('AMZN'), Stock().get('GOOG'), Stock().get('FB')][:n]
+        # get the list of stock symbols of the portfolio
+        rows = execute_query("MATCH (p:portfolio {id:%s})-[r:contains]->(s:stock) RETURN s.symbol"%(portfolio.id))
+        current_symbol_list = []
+        for row in rows:
+            row = row.data()['s.symbol']
+            current_symbol_list = current_symbol_list + [row]
+        # update the list of stock symbols with newly recommended stocks
+        new_symbol_list = rc.recommend(current_symbol_list, n)
+        returnList = []
+        for symbol in new_symbol_list[-n:]:
+            returnList = returnList + [Stock().get(symbol)]
+        return returnList
 
     @classmethod
     def delete_stock(cls, portfolio=None, stock=None):
@@ -526,7 +541,7 @@ if __name__ == '__main__':
    p.add_portfolio('portfolio2', User().get(2))
    print(p.query_all())
    print(p.query_all_by_user())
-   print(p.recommend_stocks())
+   print(p.recommend_stocks(p.get(1)))
    print(p.add_stock(p.get(1), Stock().get('SANA')))
    p.add_stock(p.get(2), Stock().get('MSFT'))
    print(p.query_all())
