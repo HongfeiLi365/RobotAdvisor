@@ -1,7 +1,6 @@
 import numpy as np
 import sys
 import random
-sys.path.append('../flaskblog')
 import neo4j_db_utils as n4j
 
 def recommend(symbol_list, n = 3, n_label = 5):

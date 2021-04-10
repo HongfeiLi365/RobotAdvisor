@@ -3,8 +3,6 @@ from flaskblog import login_manager
 from flask_login import UserMixin
 from .neo4j_db_utils import execute_query
 from flask import abort
-import sys
-sys.path.append('../recommendation')
 import recommend as rc
 
 @login_manager.user_loader
