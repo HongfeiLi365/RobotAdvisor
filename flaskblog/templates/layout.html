@@ -27,13 +27,15 @@
           <div class="collapse navbar-collapse" id="navbarToggle">
             <div class="navbar-nav mr-auto">
               <a class="nav-item nav-link" href="{{ url_for('about') }}">About</a>
-              <a class="nav-item nav-link" href="{{ url_for('portfolio') }}">View Exisiting Portfolios</a>
+              <a class="nav-item nav-link" href="{{ url_for('portfolio') }}">Portfolios</a>
               <a class="nav-item nav-link" href="{{ url_for('blog') }}">Forum</a>
             </div>
             <!-- Navbar Right Side -->
             <div class="navbar-nav">
               {% if current_user.is_authenticated %}
-                <a class="nav-item nav-link" href="{{ url_for('new_post') }}">New Post</a>
+                {% if "blog" in request.path or "post" in request.path %}
+                  <a class="nav-item nav-link" href="{{ url_for('new_post') }}">New Post</a>
+                {% endif %}
                 <a class="nav-item nav-link" href="{{ url_for('account') }}">Account</a>
                 <a class="nav-item nav-link" href="{{ url_for('logout') }}">Logout</a>
               {% else %}

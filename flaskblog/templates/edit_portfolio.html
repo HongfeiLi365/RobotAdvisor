@@ -1,18 +1,24 @@
 {% extends "layout.html" %}
 {% block content %}
-<div class="container-xl">
-	<div class="table-responsive">
-		<div class="table-wrapper">
+<div class="container-fluid">
+	<div class="table">
 			<div class="table-title">
 				<div class="row">
-					<div class="col-sm-8">
+					<div class="col">
 						<h2>{{portfolio.name}}</h2>
 					</div>
-					<div class="col-sm-2-flex">
-						<a href="#deleteEntirePortfolioModal" class="btn btn-danger" data-toggle="modal"><i class="material-icons">&#xE147;</i> <span>Delete Entire Portfolio</span></a>
+					<div class="col-flex text-right">
+						<a href="#deleteEntirePortfolioModal" class="btn btn-danger" data-toggle="modal">
+							<i class="material-icons align-bottom">&#xE92B;</i> 
+							<span>Delete Entire Portfolio</span></a>
 					</div>
-					<div class="col-sm-2-flex">
-						<a href="{{ url_for('addStockToPortfolio', portfolio_id=portfolio.id) }}" class="btn btn-success"><i class="material-icons">&#xE147;</i> <span>Add New Stock</span></a>
+					<div class="col-flex text-right">
+						<a href="{{ url_for('addStockToPortfolio', portfolio_id=portfolio.id) }}" class="btn btn-success">
+							<i class="material-icons align-bottom">&#xE147;</i> 
+							<span>Add New Stock</span></a>
+					</div>
+					<div class="col-flex">
+						<h2>&nbsp;&nbsp;</h2>
 					</div>
 				</div>
 			</div>
@@ -21,10 +27,10 @@
 					<tr>
 						<th>#</th>
 						<th>Symbol</th>
-						<th>return_on_assets</th>
-						<th>total_debt_to_equity</th>
-						<th>operating_cash_flow</th>
-						<th>revenue_per_share</th>
+						<th>Return On Equity</th>
+						<th>Operating Margin</th>
+						<th>Profit Margin</th>
+						<th>Earnings Per Share</th>
 						<th>More Details</th>
 					</tr>
 				</thead>
@@ -34,16 +40,15 @@
 		            <tr>
 		              	<th scope="row">{{loop.index}}</th>
 						<td><a href="{{ url_for('stockDetails', stock_name=member['symbol'], portfolio_id=portfolio.id) }}">{{member.symbol}}<br></a></td>
-						<td>{{member.return_on_assets}}</td>
-						<td>{{member.total_debt_to_equity}}</td>
-						<td>{{member.operating_cash_flow}}</td>
-						<td>{{member.revenue_per_share}}</td>
-						<td><a href="{{ url_for('stockDetails', stock_name=member['symbol'], portfolio_id=portfolio.id) }}">Details<br></a></td>
+						<td>{{member.return_on_equity}}</td>
+						<td>{{member.operating_margin}}</td>
+						<td>{{member.profit_margin}}</td>
+						<td>{{member.diluted_eps}}</td>
+						<td><a href="{{ url_for('stockDetails', stock_name=member['symbol'], portfolio_id=portfolio.id) }}">View<br></a></td>
 		            </tr>
 					{% endfor %}
 				</tbody>
 			</table>
-		</div>
 	</div>
 </div>
 <!-- Modal -->

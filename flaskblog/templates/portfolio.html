@@ -14,11 +14,11 @@
             <tr>
               <th scope="row">{{loop.index}}</th>
               <td><a href="{{ url_for('edit_portfolio', portfolio_id=item['id']) }}">{{ item['name']}}<br></a></td>
-              <td><a href="{{ url_for('edit_portfolio', portfolio_id=item['id']) }}">Details<br></a></td>
+              <td><a href="{{ url_for('edit_portfolio', portfolio_id=item['id']) }}">View<br></a></td>
             </tr>
         {% endfor %}
     </tbody>
     </table>
-    <a href="{{ url_for('new_portfolio') }}">Click here to add a new Portfolio<br></a>
+    <a href="{{ url_for('new_portfolio') }}" class="btn btn-success">Add New Portfolio<br></a>
     <p>Click on a portfolio's name or the details link on the table to edit the portfolio. </p>
 {% endblock content %}
