@@ -1,59 +1,98 @@
 {% extends "layout.html" %}
 {% block content %}
-<div class="container-xl">
-	<div class="table-responsive">
+<div class="container-fluid">
+	<div class="table">
 		<div class="table-wrapper">
 			<div class="table-title">
 				<div class="row">
-					<div class="col-sm-6">
+					<div class="col">
 						<h2>Details - {{stock.symbol}}</h2>
 					</div>
-					<div class="col-sm-6">
-						<a href="#deleteFromPortfolioModal" class="btn btn-danger" data-toggle="modal"><i class="material-icons">&#xE147;</i> <span>Delete Stock From Portfolio</span></a>
+					<div class="col-flex text-right">
+						<a href="#deleteFromPortfolioModal" class="btn btn-danger" data-toggle="modal"><i class="material-icons align-bottom">&#xE92B;</i> <span>Delete Stock From Portfolio</span></a>
 					</div>
+					<div class="col-flex">
+						<h2>&nbsp;&nbsp;</h2>
+					</div>
+
 				</div>
 			</div>
 			<table class="table table-striped table-hover">
 				<thead>
 					<tr>
-						<th>Symbol</th>
-						<th>return_on_assets</th>
-						<th>total_debt_to_equity</th>
-						<th>operating_cash_flow</th>
-						<th>operating_margin</th>
-						<th>shares_outstanding</th>
-						<th>current_ratio</th>
-						<th>ebitha</th>
-						<th>quarterly_revenue_growth</th>
-						<th>most_recent_quarter</th>
-						<th>quarterly_earnings_growth</th>
-						<th>return_on_equity</th>
-						<th>profit_margin</th>
-						<th>diluted_eps</th>
-						<th>payout_ratio</th>
-						<th>total_cash_per_share</th>
-						<th>revenue_per_share</th>
+						<th>Measures</th>
+						<th>Values</th>
+
 					</tr>
 				</thead>
 				<!-- This section needs to be changed into a loop. It should loop through the Dataframe recieved, and poputlate the table with data -->
 				<tbody>
-		            <tr>
+					<tr>
+						<td>Symbol</td>
 						<td>{{stock.symbol}}</td>
-						<td>{{stock.return_on_assets}}</td>
-						<td>{{stock.total_debt_to_equity}}</td>
-						<td>{{stock.operating_cash_flow}}</td>
-						<td>{{stock.operating_margin}}</td>
-						<td>{{stock.shares_outstanding}}</td>
-						<td>{{stock.current_ratio}}</td>
-						<td>{{stock.ebitda}}</td>
-						<td>{{stock.quarterly_revenue_growth}}</td>
+					</tr>
+					<tr>					
+						<td>Most Recent Quarter</td>
 						<td>{{stock.most_recent_quarter}}</td>
+		            </tr>
+					<tr>
+						<td>Return On Assets</td>
+						<td>{{stock.return_on_assets}}</td>
+					</tr>
+		            <tr>					
+						<td>Debt To Equity</td>
+						<td>{{stock.total_debt_to_equity}}</td>
+		            </tr>
+					<tr>					
+						<td>Operating Cash Flow</td>
+						<td>{{stock.operating_cash_flow}}</td>
+		            </tr>
+					<tr>					
+						<td>Operating Margin</td>
+						<td>{{stock.operating_margin}}</td>
+		            </tr>
+					<tr>					
+						<td>Shares Outstanding</td>
+						<td>{{stock.shares_outstanding}}</td>
+		            </tr>
+					<tr>					
+						<td>Current Ratio</td>
+						<td>{{stock.current_ratio}}</td>
+		            </tr>
+					<tr>					
+						<td>EBITDA</td>
+						<td>{{stock.ebitda}}</td>
+		            </tr>
+					<tr>					
+						<td>Quarterly Revenue Growth</td>
+						<td>{{stock.quarterly_revenue_growth}}</td>
+		            </tr>
+					<tr>					
+						<td>Quarterly Earnings Growth</td>
 						<td>{{stock.quarterly_earnings_growth}}</td>
+		            </tr>
+					<tr>					
+						<td>Return On Equity</td>
 						<td>{{stock.return_on_equity}}</td>
+		            </tr>
+					<tr>					
+						<td>Profit Margin</td>
 						<td>{{stock.profit_margin}}</td>
+		            </tr>
+					<tr>					
+						<td>Diluted EPS</td>
 						<td>{{stock.diluted_eps}}</td>
+		            </tr>
+					<tr>					
+						<td>Payout Ratio</td>
 						<td>{{stock.payout_ratio}}</td>
+		            </tr>
+					<tr>					
+						<td>Cash Per Share</td>
 						<td>{{stock.total_cash_per_share}}</td>
+		            </tr>
+					<tr>					
+						<td>Revenue Per Share</td>
 						<td>{{stock.revenue_per_share}}</td>
 		            </tr>
 				</tbody>
