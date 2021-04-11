@@ -494,6 +494,9 @@ class Stock():
     def __repr__(self):
         return f"Stock('{self.symbol}', '{self.revenue_per_share}')"
 
+    def rounding(self, num, digits=4):
+        return round(float(num), digits)
+
     def _load_row(self, row):
         """
         set attributes of current object
@@ -505,22 +508,22 @@ class Stock():
         """
         self.symbol = row['symbol']
         try:
-            self.return_on_assets = row['return_on_assets']
-            self.total_debt_to_equity = row['total_debt_to_equity']
-            self.operating_cash_flow = row['operating_cash_flow']
-            self.revenue_per_share = row['revenue_per_share']
-            self.operating_margin = row['operating_margin']
-            self.shares_outstanding = row['shares_outstanding']
-            self.current_ratio = row['current_ratio']
-            self.ebitda = row['ebitda']
-            self.quarterly_revenue_growth = row['quarterly_revenue_growth']
+            self.return_on_assets = self.rounding(row['return_on_assets'])
+            self.total_debt_to_equity = self.rounding(row['total_debt_to_equity'])
+            self.operating_cash_flow = int(row['operating_cash_flow'])
+            self.revenue_per_share = self.rounding(row['revenue_per_share'])
+            self.operating_margin = self.rounding(row['operating_margin'])
+            self.shares_outstanding = int(row['shares_outstanding'])
+            self.current_ratio = self.rounding(row['current_ratio'])
+            self.ebitda = int(row['ebitda'])
+            self.quarterly_revenue_growth = self.rounding(row['quarterly_revenue_growth'])
             self.most_recent_quarter = row['most_recent_quarter']
-            self.quarterly_earnings_growth = row['quarterly_earnings_growth']
-            self.return_on_equity = row['return_on_equity']
-            self.profit_margin = row['profit_margin']
-            self.diluted_eps = row['diluted_eps']
-            self.payout_ratio = row['payout_ratio']
-            self.total_cash_per_share = row['total_cash_per_share']
+            self.quarterly_earnings_growth = self.rounding(row['quarterly_earnings_growth'])
+            self.return_on_equity = self.rounding(row['return_on_equity'])
+            self.profit_margin = self.rounding(row['profit_margin'])
+            self.diluted_eps = self.rounding(row['diluted_eps'])
+            self.payout_ratio = self.rounding(row['payout_ratio'])
+            self.total_cash_per_share = self.rounding(row['total_cash_per_share'])
         except:
             pass
 
