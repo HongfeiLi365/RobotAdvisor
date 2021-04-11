@@ -1,14 +1,15 @@
 {% extends "layout.html" %}
 {% block content %}
-    <h1>Welcome to the RobotAdvisor. Here are some links to get started.</h1>
+    <h1>Welcome to Robot Advisor!</h1>
+    <h4>To get started:</h4>
     {% if current_user.is_authenticated %}
-      <a href="{{ url_for('portfolio') }}">View Portfolios<br></a>
-      <a href="{{ url_for('new_portfolio') }}">New Portfolio<br></a>
-      <a href="{{ url_for('blog') }}">Blog<br></a>
+      <a href="{{ url_for('portfolio') }}">View Existing Portfolios<br></a>
+      <a href="{{ url_for('new_portfolio') }}">Add New Portfolio<br></a>
+      <a href="{{ url_for('blog') }}">View Posts on Forum<br></a>
       <a href="{{ url_for('logout') }}">Logout<br></a>
     {% else %}
       <a href="{{ url_for('login') }}">Login<br></a>
       <a href="{{ url_for('register') }}">Register<br></a>
-      <a href="{{ url_for('blog') }}">Blog<br></a>
+      <a href="{{ url_for('blog') }}">Forum<br></a>
     {% endif %}
 {% endblock content %}
