@@ -390,7 +390,7 @@ class Portfolio():
         try:
             if execute_query("MATCH (p:portfolio)-[:contains]->(s:stock) WHERE p.id = %s AND s.symbol = '%s' RETURN s" % (portfolio.id, stock.symbol)) == []:
                 execute_query(
-                    "MATCH (p:portfolio) WHERE p.id = %s CREATE (p)-[:contains]->(s:stock {symbol:'%s'})" % (portfolio.id, stock.symbol))
+                    "MATCH (p:portfolio), (s:stock) WHERE p.id = %s AND s.symbol = '%s' CREATE (p)-[r:contains]->(s) RETURN r" % (portfolio.id, stock.symbol))
             return True
         except:
             print('Stock cannot be added')
@@ -495,7 +495,20 @@ class Stock():
         return f"Stock('{self.symbol}', '{self.revenue_per_share}')"
 
     def rounding(self, num, digits=4):
+        try:
+            num = num.strip('\n')
+        except:
+            pass
         return round(float(num), digits)
+    
+    def int_conv(self, num):
+        try:
+            num = num.strip('\n')
+            num = num.strip('.0')
+        except:
+            pass
+        return int(num)
+
 
     def _load_row(self, row):
         """
@@ -510,12 +523,12 @@ class Stock():
         try:
             self.return_on_assets = self.rounding(row['return_on_assets'])
             self.total_debt_to_equity = self.rounding(row['total_debt_to_equity'])
-            self.operating_cash_flow = int(row['operating_cash_flow'])
+            self.operating_cash_flow = self.int_conv(row['operating_cash_flow'])
             self.revenue_per_share = self.rounding(row['revenue_per_share'])
             self.operating_margin = self.rounding(row['operating_margin'])
-            self.shares_outstanding = int(row['shares_outstanding'])
+            self.shares_outstanding = self.int_conv(row['shares_outstanding'])
             self.current_ratio = self.rounding(row['current_ratio'])
-            self.ebitda = int(row['ebitda'])
+            self.ebitda = self.int_conv(row['ebitda'])
             self.quarterly_revenue_growth = self.rounding(row['quarterly_revenue_growth'])
             self.most_recent_quarter = row['most_recent_quarter']
             self.quarterly_earnings_growth = self.rounding(row['quarterly_earnings_growth'])
