@@ -6,7 +6,8 @@ from flaskblog import app, bcrypt
 from flaskblog.forms import RegistrationForm, LoginForm, UpdateAccountForm, PostForm, PortfolioForm, AddStockToPortfolioForm
 from .modelsWithNeo4j import User, Post, Portfolio, Stock
 from flask_login import login_user, current_user, logout_user, login_required
-from .db_utils import execute_query
+from .sql_db_utils import execute_query
+from .modelsWithSQL import filter_stocks
 
 @app.route("/blog")
 def blog():
