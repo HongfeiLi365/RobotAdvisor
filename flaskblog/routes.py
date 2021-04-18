@@ -3,7 +3,7 @@ import secrets
 from PIL import Image
 from flask import render_template, url_for, flash, redirect, request, abort
 from flaskblog import app, bcrypt
-from flaskblog.forms import RegistrationForm, LoginForm, UpdateAccountForm, PostForm, PortfolioForm, AddStockToPortfolioForm
+from flaskblog.forms import RegistrationForm, LoginForm, UpdateAccountForm, PostForm, PortfolioForm, AddStockToPortfolioForm, SQLSearchForm
 from .modelsWithNeo4j import User, Post, Portfolio, Stock
 from flask_login import login_user, current_user, logout_user, login_required
 from .sql_db_utils import execute_query
@@ -172,7 +172,23 @@ def deleteFromPortfolio(stock_name, portfolio_id):
     flash('Removed from portfolio!', 'success')
     return redirect(url_for('edit_portfolio', portfolio_id=portfolio_id))
 
+################################################################################
+#SQL Stock Screener Section
+################################################################################
 
+@app.route("/screener", methods=['GET', 'POST'])
+def screener():
+    form = SQLSearchForm()
+    if form.validate_on_submit():
+        m_payout_ratio = form.payout_ratio_field.data
+        m_operating_margin = form.operating_margin_field.data
+        m_profit_margin = form.profit_margin_field.data
+        print ('Payout Ratio: ' + m_payout_ratio)
+        print ('Operating margin: ' + m_operating_margin)
+        print ('Profit margin: ' + m_profit_margin)
+        m_searchResults = filter_stocks(payout_ratio=m_payout_ratio, operating_margin=m_operating_margin, profit_margin=m_profit_margin)
+        return render_template('sqlSearch.html', title='Screener After Submit', form=form, searchResults= m_searchResults)
+    return render_template('sqlSearch.html', title='Screener', form=form)
 ################################################################################
 #Blog Section
 ################################################################################

@@ -1,7 +1,7 @@
 from flask_wtf import FlaskForm
 from flask_wtf.file import FileField, FileAllowed
 from flask_login import current_user
-from wtforms import StringField, PasswordField, SubmitField, BooleanField, TextAreaField
+from wtforms import StringField, PasswordField, SubmitField, BooleanField, TextAreaField, SelectField
 from wtforms.validators import DataRequired, Length, Email, EqualTo, ValidationError
 from flaskblog.modelsWithNeo4j import User
 
@@ -75,3 +75,16 @@ class PortfolioForm(FlaskForm):
 class AddStockToPortfolioForm(FlaskForm):
     name = StringField('Name of Stock', validators=[DataRequired()])
     submit = SubmitField('Submit')
+
+class SQLSearchForm(FlaskForm):
+    payout_ratio_choices = [('Any','Any'), ('None','None'), ('Positive','Positive'), ('Low','Low'), ('High','High')]
+    payout_ratio_field = SelectField('Payout Ratio', choices=payout_ratio_choices)
+
+    operating_margin_choices = [('Any','Any'), ('Positive','Positive'), ('Negative','Negative'), ('High','High'),
+                                ('Very Negative','Very Negative')]
+    operating_margin_field = SelectField('Operating Margin', choices=operating_margin_choices)
+
+    profit_margin_choices = [('Any','Any'), ('Positive','Positive'), ('Negative','Negative'), ('High','High')]
+    profit_margin_field = SelectField('Profit Margin', choices=profit_margin_choices)
+
+    submit = SubmitField('Search')
