@@ -123,9 +123,9 @@ class Post():
 
         Returns
         -------
-        list of portafolio objects
+        list of portafolio objects, order by the posted date of the post from new to old
         """
-        rows = execute_query('MATCH (n:portafolio) RETURN n')
+        rows = execute_query('MATCH (n:portafolio) RETURN n order by n.date_posted')
         print(rows)
         posts = []
         for row in rows:
@@ -246,9 +246,6 @@ class Post():
         """
         Update post title and content in database by current attribute values
         """
-        # print("+++++++++++++++++++++")
-        #print("post update is called")
-        # print("+++++++++++++++++++++")
         execute_query(
             "MATCH (p:portafolio) WHERE p.id = %s SET p.title = '%s', p.content = '%s'" % (
                 self.id, self.title, self.content),
