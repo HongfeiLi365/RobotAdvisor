@@ -49,12 +49,18 @@
 					{% endfor %}
 				</tbody>
 			</table>
+			<!-- <div style="text-align:left">
+				<p>Looking for some new stocks? Click the button to see your recommended stocks.
+					 Your recomendation is created with the help of machine learning.</p>
+			</div> -->
 			<div style="text-align:center">
-				<a href="{{ url_for('portfolio') }}" class="btn btn-info">
+				<a href="{{ url_for('portfolio') }}" class="btn btn-secondary">
 					<i class="material-icons align-bottom">&#xE5C4;</i>
 					<span>Return to your other portfolios</span></a>
-
-			</div
+				<!-- <a href="{{ url_for('recommend', portfolio_id=portfolio.id)}}" class="btn btn-info">
+					<i class="material-icons align-bottom">&#xE39F;</i>
+					<span>Recomendations</span></a> -->
+			</div>
 	</div>
 </div>
 <!-- Modal -->

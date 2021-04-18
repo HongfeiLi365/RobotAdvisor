@@ -123,7 +123,7 @@ def new_portfolio():
     return render_template('create_portfolio.html', title='New Portfolio',
                            form=form, legend='New Portfolio')
 
-@app.route("/post/delete/<int:portfolio_id>", methods=['POST'])
+@app.route("/portfolio/delete/<int:portfolio_id>", methods=['POST'])
 @login_required
 def delete_portfolio(portfolio_id):
     portfolio = Portfolio().get_or_404(portfolio_id)
@@ -136,6 +136,7 @@ def delete_portfolio(portfolio_id):
 def addStockToPortfolio(portfolio_id):
     form = AddStockToPortfolioForm()
     m_Portfolio = Portfolio().get_or_404(portfolio_id)
+    recommendations = Portfolio.recommend_stocks(portfolio=m_Portfolio)
     if form.validate_on_submit():
         m_Stock = Stock().get(symbol=form.name.data.upper())
         if (Portfolio.add_stock(portfolio=m_Portfolio, stock=m_Stock)):
@@ -144,7 +145,16 @@ def addStockToPortfolio(portfolio_id):
             flash('Error! Stock not present in database', 'danger')
         return redirect(url_for('edit_portfolio', portfolio_id=portfolio_id))
     return render_template('addStock.html', title='Add Stock',
-                           form=form, legend='Add Stock to Portfolio')
+                           form=form, legend='Add Stock to Portfolio',
+                           portfolio=m_Portfolio,
+                           recommendations = recommendations)
+
+@app.route("/portfolio/recommend/<int:portfolio_id>", methods=['GET','POST'])
+@login_required
+def recommend(portfolio_id):
+    m_portfolio = Portfolio().get_or_404(portfolio_id)
+    recommendations = Portfolio.recommend_stocks(portfolio=m_portfolio)
+    return render_template('recommendations.html', title='Recomended Stocks', recommendations = recommendations, portfolio = m_portfolio)
 
 @app.route("/portfolio/Stock/details/<string:stock_name>/<int:portfolio_id>", methods=['GET', 'POST'])
 def stockDetails(stock_name, portfolio_id):
