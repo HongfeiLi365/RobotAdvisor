@@ -9,10 +9,6 @@ from flask_login import login_user, current_user, logout_user, login_required
 from .sql_db_utils import execute_query
 from .modelsWithSQL import filter_stocks
 
-@app.route("/blog")
-def blog():
-    posts = Post.query_all()
-    return render_template('blog.html', posts=posts)
 
 @app.route("/about")
 def about():
@@ -23,14 +19,9 @@ def about():
 def home():
     return render_template('home.html', title='Home')
 
-@app.route("/portfolio")
-@login_required
-def portfolio():
-    if current_user.is_authenticated:
-        userPortfolios = Portfolio.query_all_by_user(user = current_user)
-        if(len(userPortfolios) < 1):
-            flash("You have no portfolios. Please click the link below to create a portfolio.",'info')
-        return render_template('portfolio.html', title='Portfolio', results=userPortfolios)
+################################################################################
+#User login section. Utilizes the modelsWithNeo4j class
+################################################################################
 
 @app.route("/register", methods=['GET', 'POST'])
 def register():
@@ -80,7 +71,6 @@ def save_picture(form_picture):
 
     return picture_fn
 
-
 @app.route("/account", methods=['GET', 'POST'])
 @login_required
 def account():
@@ -100,6 +90,18 @@ def account():
     image_file = url_for('static', filename='profile_pics/' + current_user.image_file)
     return render_template('account.html', title='Account',
                            image_file=image_file, form=form)
+
+################################################################################
+#Portfolio Section. Utilizes the modelsWithNeo4j class
+################################################################################
+@app.route("/portfolio")
+@login_required
+def portfolio():
+    if current_user.is_authenticated:
+        userPortfolios = Portfolio.query_all_by_user(user = current_user)
+        if(len(userPortfolios) < 1):
+            flash("You have no portfolios. Please click the link below to create a portfolio.",'info')
+        return render_template('portfolio.html', title='Portfolio', results=userPortfolios)
 
 @app.route("/portfolio/edit/<int:portfolio_id>", methods=['GET','POST'])
 @login_required
@@ -159,6 +161,15 @@ def deleteFromPortfolio(stock_name, portfolio_id):
 
     flash('Removed from portfolio!', 'success')
     return redirect(url_for('edit_portfolio', portfolio_id=portfolio_id))
+
+
+################################################################################
+#Blog Section
+################################################################################
+@app.route("/blog")
+def blog():
+    posts = Post.query_all()
+    return render_template('blog.html', posts=posts)
 
 @app.route("/post/new", methods=['GET', 'POST'])
 @login_required
