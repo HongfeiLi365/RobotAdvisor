@@ -3,7 +3,7 @@ from flaskblog import login_manager
 from flask_login import UserMixin
 from .neo4j_db_utils import execute_query
 from flask import abort
-from .recommend import recommend as rc
+from .recommend import recommend
 
 
 @login_manager.user_loader
@@ -415,7 +415,7 @@ class Portfolio():
             row = row.data()['s.symbol']
             current_symbol_list = current_symbol_list + [row]
         # update the list of stock symbols with newly recommended stocks
-        new_symbol_list = rc.recommend(current_symbol_list, n)
+        new_symbol_list = recommend(current_symbol_list, n)
         returnList = []
         for symbol in new_symbol_list[-n:]:
             returnList = returnList + [Stock().get(symbol)]
@@ -497,7 +497,7 @@ class Stock():
         except:
             pass
         return round(float(num), digits)
-    
+
     def int_conv(self, num):
         try:
             num = num.strip('\n')
