@@ -9,12 +9,12 @@
 					</div>
 					<div class="col-flex text-right">
 						<a href="#deleteEntirePortfolioModal" class="btn btn-danger" data-toggle="modal">
-							<i class="material-icons align-bottom">&#xE92B;</i> 
+							<i class="material-icons align-bottom">&#xE92B;</i>
 							<span>Delete Entire Portfolio</span></a>
 					</div>
 					<div class="col-flex text-right">
 						<a href="{{ url_for('addStockToPortfolio', portfolio_id=portfolio.id) }}" class="btn btn-success">
-							<i class="material-icons align-bottom">&#xE147;</i> 
+							<i class="material-icons align-bottom">&#xE147;</i>
 							<span>Add New Stock</span></a>
 					</div>
 					<div class="col-flex">
@@ -22,15 +22,15 @@
 					</div>
 				</div>
 			</div>
-			<table class="table table-striped table-hover">
+			<table id="sortableTable" class="table table-striped table-hover">
 				<thead>
 					<tr>
-						<th>#</th>
-						<th>Symbol</th>
-						<th>Return On Equity</th>
-						<th>Operating Margin</th>
-						<th>Profit Margin</th>
-						<th>Earnings Per Share</th>
+						<th onclick="sortTable(0)">#</th>
+						<th onclick="sortTable(1)">Symbol</th>
+						<th onclick="sortTable(2)">Return On Equity</th>
+						<th onclick="sortTable(3)">Operating Margin</th>
+						<th onclick="sortTable(4)">Profit Margin </th>
+						<th onclick="sortTable(5)">Earnings Per Share</th>
 						<th>More Details</th>
 					</tr>
 				</thead>
@@ -38,7 +38,7 @@
 				<tbody>
 					{% for member in portfolio.member %}
 		            <tr>
-		              	<th scope="row">{{loop.index}}</th>
+		              	<td>{{loop.index}}</td>
 						<td><a href="{{ url_for('stockDetails', stock_name=member['symbol'], portfolio_id=portfolio.id) }}">{{member.symbol}}<br></a></td>
 						<td>{{member.return_on_equity}}</td>
 						<td>{{member.operating_margin}}</td>
@@ -49,6 +49,12 @@
 					{% endfor %}
 				</tbody>
 			</table>
+			<div style="text-align:center">
+				<a href="{{ url_for('portfolio') }}" class="btn btn-info">
+					<i class="material-icons align-bottom">&#xE5C4;</i>
+					<span>Return to your other portfolios</span></a>
+
+			</div
 	</div>
 </div>
 <!-- Modal -->

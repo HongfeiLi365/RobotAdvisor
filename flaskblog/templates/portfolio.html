@@ -1,11 +1,14 @@
 {% extends "layout.html" %}
 {% block content %}
 <h1>Your Portfolios</h1>
-<table class="table" table-striped>
+<table
+  id="sortableTable"
+  class="table" table-striped
+  >
     <thead>
     <tr>
-      <th scope="col">#</th>
-      <th scope="col">Portfolio Name</th>
+      <th scope="col" onclick="sortTable(0)">#</th>
+      <th scope="col" onclick="sortTable(1)"">Portfolio Name</th>
       <th scope="col">Details</th>
     </tr>
     </thead>
@@ -19,6 +22,8 @@
         {% endfor %}
     </tbody>
     </table>
-    <a href="{{ url_for('new_portfolio') }}" class="btn btn-success">Add New Portfolio<br></a>
+    <div style="text-align:center">
+        <a href="{{ url_for('new_portfolio') }}" class="btn btn-success">Add New Portfolio<br></a>
+    </div
     <p>Click on a portfolio's name or the details link on the table to edit the portfolio. </p>
 {% endblock content %}
