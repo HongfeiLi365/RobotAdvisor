@@ -1,19 +1,23 @@
 from datetime import datetime
 # from flaskblog import login_manager
 # from flask_login import UserMixin
-from .sql_db_utils import execute_query
+from .sql_db_utils import execute_query, execute_prepared_stmt
 from flask import abort
+
 
 class StockSQL():
     symbol = None
-    payout_ratio = None
-    operating_margin = None
+    market_cap = None
+    sma200 = None
+    ps = None
+    gross_margin = None
     profit_margin = None
+    operating_margin = None
 
     def __repr__(self):
         return f"Stock('{self.symbol}')"
 
-    def _load_row(self, row):
+    def load_row(self, row):
         """
         set attributes of current object
 
@@ -22,74 +26,62 @@ class StockSQL():
         row : dict
             a record from database
         """
-        self.symbol = row['symbol']
-        self.payout_ratio = row['payout_ratio']
-        self.operating_margin = row['operating_margin']
-        self.profit_margin = row['profit_margin']
-
-    def get(self, symbol=None):
-        """
-        Retrieve a stock from database by symbol.
-        Return None if such a post does not exist in database.
-
-        Returns
-        -------
-        Stock object
-            retrieved stock
-        """
-        try:
-            row = execute_query(
-                "MATCH (s:stock) WHERE s.symbol='%s' return s" % (symbol))
-            row = row[0].data()['s']
-            self._load_row(row)
-            return self
-        except IndexError:
-            return None
+        self.symbol = row[0]
+        self.market_cap = row[1]
+        self.sma200 = row[2]
+        self.ps = row[3]
+        self.gross_margin = row[4]
+        self.profit_margin = row[5]
+        self.operating_margin = row[6]
 
 
-def filter_stocks(payout_ratio='Any', operating_margin='Any', profit_margin='Any'):
+def filter_stocks(market_cap='Any', sma200='Any', ps='Any',
+                  gross_margin='Any', profit_margin='Any',
+                  operating_margin='Any'):
     """return stocks matching filtering conditions
 
     Parameters
     ----------
-    payout_ratio : str,
-         One of 'Any', 'None(0%)', 'Positive(>0%)', 'Low(<20%)', 'High(>50%)'
+    market_cap : str
+        Market Cap, one of 'Any', 'Micro(<$300mln)', 'Small($300mln~$2bln)',
+        'Mid($2bln~$10bln)', 'Large(>$10bln)'
+    sma200 : str
+        200-day Simple Moving Average, one of 'Any', 'Price above SMA200', 
+        'Price below SMA200'
+    ps : str
+        Price to Sales ratio, one of 'Any', 'Low(<1)', 'High(>10)', 'Under 10'
+    gross_margin : str
+        Gross Margin, one of 'Any', 'Positive(>0%)', 'Negative(<0%)', 'High(>50%)'
+    profit_margin : str
+        Profit Margin, one of 'Any', 'Positive(>0%)', 'Negative(<0%)', 'High(>20%)'
     operating_margin : str
-        One of 'Any', 'Positive(>0%)', 'Negative(<0%)', 'High(>25%)', 'Very Negative(<-20%)'
-    profit_margin : str, optional
-        'Any', 'Positive(>0%)', 'Negative(<0%)', 'High(>20%)'
+        Operating Margi, one of 'Any', 'Positive(>0%)', 'Negative(<0%)', 
+        'High(>25%)', 'Very Negative(<-20%)'
 
     Returns
     -------
     list of StockSQL objects
         stocks
-
-    Examples
-    --------
-    >>> stocks = filter_stocks(payout_ratio='Positive(>0%)',
-    ...                       operating_margin='Negative(<0%)',
-    ...                       profit_margin='High(>20%)')
-    >>> for stock in stocks:
-    >>>     print(stock.symbol)
-    >>>     print(stock.payout_ratio)
-    >>>     print(stock.operating_margin)
-    >>>     print(stock.profit_margin)
     """
-    rows = execute_query(
-        "SELECT * FROM statistics LIMIT 5")
+    stmt = 'CALL filter_stocks(%s, %s, %s, %s, %s, %s)'
+    data = (market_cap, sma200, ps, gross_margin,
+            profit_margin, operating_margin)
+    rows = execute_prepared_stmt(stmt, data)
+
     stocks = []
     for row in rows:
         s = StockSQL()
-        s._load_row(row)
+        s.load_row(row)
         stocks.append(s)
     return stocks
 
+
 # @login_manager.user_loader
 # def load_user(user_id):
-#     return User().get(user_id=int(user_id))
+#     return UserSQL().get(user_id=int(user_id))
 #
 #
-# class User(UserMixin):
+# class UserSQL(UserMixin):
 #     id = None
 #     username = None
 #     email = None
@@ -161,7 +153,7 @@ def filter_stocks(payout_ratio='Any', operating_margin='Any', profit_margin='Any
 #             fetch=False)
 #
 #
-# class Post():
+# class PostSQL():
 #     id = None
 #     title = None
 #     date_posted = datetime.utcnow()
