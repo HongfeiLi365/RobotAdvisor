@@ -3,7 +3,7 @@ from flaskblog import login_manager
 from flask_login import UserMixin
 from .neo4j_db_utils import execute_query
 from flask import abort
-from .recommend import recommend as rc
+from .recommend import recommend
 
 
 @login_manager.user_loader
@@ -123,9 +123,9 @@ class Post():
 
         Returns
         -------
-        list of portafolio objects
+        list of portafolio objects, order by the posted date of the post from new to old
         """
-        rows = execute_query('MATCH (n:portafolio) RETURN n')
+        rows = execute_query('MATCH (n:portafolio) RETURN n order by n.date_posted')
         print(rows)
         posts = []
         for row in rows:
@@ -246,9 +246,6 @@ class Post():
         """
         Update post title and content in database by current attribute values
         """
-        # print("+++++++++++++++++++++")
-        #print("post update is called")
-        # print("+++++++++++++++++++++")
         execute_query(
             "MATCH (p:portafolio) WHERE p.id = %s SET p.title = '%s', p.content = '%s'" % (
                 self.id, self.title, self.content),
@@ -418,7 +415,7 @@ class Portfolio():
             row = row.data()['s.symbol']
             current_symbol_list = current_symbol_list + [row]
         # update the list of stock symbols with newly recommended stocks
-        new_symbol_list = rc.recommend(current_symbol_list, n)
+        new_symbol_list = recommend(current_symbol_list, n)
         returnList = []
         for symbol in new_symbol_list[-n:]:
             returnList = returnList + [Stock().get(symbol)]
@@ -500,7 +497,7 @@ class Stock():
         except:
             pass
         return round(float(num), digits)
-    
+
     def int_conv(self, num):
         try:
             num = num.strip('\n')

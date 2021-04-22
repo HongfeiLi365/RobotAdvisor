@@ -11,17 +11,21 @@
 					<div class="col-flex text-right">
 						<a href="#deleteFromPortfolioModal" class="btn btn-danger" data-toggle="modal"><i class="material-icons align-bottom">&#xE92B;</i> <span>Delete Stock From Portfolio</span></a>
 					</div>
+					<div class="col-flex text-right">
+						<a href="{{ url_for('edit_portfolio', portfolio_id=portfolio_id) }}" class="btn btn-info">Return to Portfolio<br></a>
+					</div>
+
 					<div class="col-flex">
 						<h2>&nbsp;&nbsp;</h2>
 					</div>
 
 				</div>
 			</div>
-			<table class="table table-striped table-hover">
+			<table id = "sortableTable" class="table table-striped table-hover">
 				<thead>
 					<tr>
-						<th>Measures</th>
-						<th>Values</th>
+						<th onclick="sortTable(0)">Measures</th>
+						<th onclick="sortTable(1)">Values</th>
 
 					</tr>
 				</thead>
@@ -31,7 +35,7 @@
 						<td>Symbol</td>
 						<td>{{stock.symbol}}</td>
 					</tr>
-					<tr>					
+					<tr>
 						<td>Most Recent Quarter</td>
 						<td>{{stock.most_recent_quarter}}</td>
 		            </tr>
@@ -39,64 +43,67 @@
 						<td>Return On Assets</td>
 						<td>{{stock.return_on_assets}}</td>
 					</tr>
-		            <tr>					
+		            <tr>
 						<td>Debt To Equity</td>
 						<td>{{stock.total_debt_to_equity}}</td>
 		            </tr>
-					<tr>					
+					<tr>
 						<td>Operating Cash Flow</td>
 						<td>{{stock.operating_cash_flow}}</td>
 		            </tr>
-					<tr>					
+					<tr>
 						<td>Operating Margin</td>
 						<td>{{stock.operating_margin}}</td>
 		            </tr>
-					<tr>					
+					<tr>
 						<td>Shares Outstanding</td>
 						<td>{{stock.shares_outstanding}}</td>
 		            </tr>
-					<tr>					
+					<tr>
 						<td>Current Ratio</td>
 						<td>{{stock.current_ratio}}</td>
 		            </tr>
-					<tr>					
+					<tr>
 						<td>EBITDA</td>
 						<td>{{stock.ebitda}}</td>
 		            </tr>
-					<tr>					
+					<tr>
 						<td>Quarterly Revenue Growth</td>
 						<td>{{stock.quarterly_revenue_growth}}</td>
 		            </tr>
-					<tr>					
+					<tr>
 						<td>Quarterly Earnings Growth</td>
 						<td>{{stock.quarterly_earnings_growth}}</td>
 		            </tr>
-					<tr>					
+					<tr>
 						<td>Return On Equity</td>
 						<td>{{stock.return_on_equity}}</td>
 		            </tr>
-					<tr>					
+					<tr>
 						<td>Profit Margin</td>
 						<td>{{stock.profit_margin}}</td>
 		            </tr>
-					<tr>					
+					<tr>
 						<td>Diluted EPS</td>
 						<td>{{stock.diluted_eps}}</td>
 		            </tr>
-					<tr>					
+					<tr>
 						<td>Payout Ratio</td>
 						<td>{{stock.payout_ratio}}</td>
 		            </tr>
-					<tr>					
+					<tr>
 						<td>Cash Per Share</td>
 						<td>{{stock.total_cash_per_share}}</td>
 		            </tr>
-					<tr>					
+					<tr>
 						<td>Revenue Per Share</td>
 						<td>{{stock.revenue_per_share}}</td>
 		            </tr>
 				</tbody>
 			</table>
+			<div style="text-align:center">
+				<a href="{{ url_for('edit_portfolio', portfolio_id=portfolio_id) }}" class="btn btn-info">Return to Portfolio<br></a>
+			</div>
 		</div>
 	</div>
 </div>

@@ -3,16 +3,12 @@ import secrets
 from PIL import Image
 from flask import render_template, url_for, flash, redirect, request, abort
 from flaskblog import app, bcrypt
-from flaskblog.forms import RegistrationForm, LoginForm, UpdateAccountForm, PostForm, PortfolioForm, AddStockToPortfolioForm
+from flaskblog.forms import RegistrationForm, LoginForm, UpdateAccountForm, PostForm, PortfolioForm, AddStockToPortfolioForm, SQLSearchForm
 from .modelsWithNeo4j import User, Post, Portfolio, Stock
 from flask_login import login_user, current_user, logout_user, login_required
 from .sql_db_utils import execute_query
 from .modelsWithSQL import filter_stocks
 
-@app.route("/blog")
-def blog():
-    posts = Post.query_all()
-    return render_template('blog.html', posts=posts)
 
 @app.route("/about")
 def about():
@@ -23,14 +19,9 @@ def about():
 def home():
     return render_template('home.html', title='Home')
 
-@app.route("/portfolio")
-@login_required
-def portfolio():
-    if current_user.is_authenticated:
-        userPortfolios = Portfolio.query_all_by_user(user = current_user)
-        if(len(userPortfolios) < 1):
-            flash("You have no portfolios. Please click the link below to create a portfolio.",'info')
-        return render_template('portfolio.html', title='Portfolio', results=userPortfolios)
+################################################################################
+#User login section. Utilizes the modelsWithNeo4j class
+################################################################################
 
 @app.route("/register", methods=['GET', 'POST'])
 def register():
@@ -80,7 +71,6 @@ def save_picture(form_picture):
 
     return picture_fn
 
-
 @app.route("/account", methods=['GET', 'POST'])
 @login_required
 def account():
@@ -100,6 +90,18 @@ def account():
     image_file = url_for('static', filename='profile_pics/' + current_user.image_file)
     return render_template('account.html', title='Account',
                            image_file=image_file, form=form)
+
+################################################################################
+#Portfolio Section. Utilizes the modelsWithNeo4j class
+################################################################################
+@app.route("/portfolio")
+@login_required
+def portfolio():
+    if current_user.is_authenticated:
+        userPortfolios = Portfolio.query_all_by_user(user = current_user)
+        if(len(userPortfolios) < 1):
+            flash("You have no portfolios. Please click the link below to create a portfolio.",'info')
+        return render_template('portfolio.html', title='Portfolio', results=userPortfolios)
 
 @app.route("/portfolio/edit/<int:portfolio_id>", methods=['GET','POST'])
 @login_required
@@ -121,7 +123,7 @@ def new_portfolio():
     return render_template('create_portfolio.html', title='New Portfolio',
                            form=form, legend='New Portfolio')
 
-@app.route("/post/delete/<int:portfolio_id>", methods=['POST'])
+@app.route("/portfolio/delete/<int:portfolio_id>", methods=['POST'])
 @login_required
 def delete_portfolio(portfolio_id):
     portfolio = Portfolio().get_or_404(portfolio_id)
@@ -134,6 +136,7 @@ def delete_portfolio(portfolio_id):
 def addStockToPortfolio(portfolio_id):
     form = AddStockToPortfolioForm()
     m_Portfolio = Portfolio().get_or_404(portfolio_id)
+    recommendations = Portfolio.recommend_stocks(portfolio=m_Portfolio)
     if form.validate_on_submit():
         m_Stock = Stock().get(symbol=form.name.data.upper())
         if (Portfolio.add_stock(portfolio=m_Portfolio, stock=m_Stock)):
@@ -142,7 +145,16 @@ def addStockToPortfolio(portfolio_id):
             flash('Error! Stock not present in database', 'danger')
         return redirect(url_for('edit_portfolio', portfolio_id=portfolio_id))
     return render_template('addStock.html', title='Add Stock',
-                           form=form, legend='Add Stock to Portfolio')
+                           form=form, legend='Add Stock to Portfolio',
+                           portfolio=m_Portfolio,
+                           recommendations = recommendations)
+
+@app.route("/portfolio/recommend/<int:portfolio_id>", methods=['GET','POST'])
+@login_required
+def recommend(portfolio_id):
+    m_portfolio = Portfolio().get_or_404(portfolio_id)
+    recommendations = Portfolio.recommend_stocks(portfolio=m_portfolio)
+    return render_template('recommendations.html', title='Recomended Stocks', recommendations = recommendations, portfolio = m_portfolio)
 
 @app.route("/portfolio/Stock/details/<string:stock_name>/<int:portfolio_id>", methods=['GET', 'POST'])
 def stockDetails(stock_name, portfolio_id):
@@ -159,6 +171,31 @@ def deleteFromPortfolio(stock_name, portfolio_id):
 
     flash('Removed from portfolio!', 'success')
     return redirect(url_for('edit_portfolio', portfolio_id=portfolio_id))
+
+################################################################################
+#SQL Stock Screener Section
+################################################################################
+
+@app.route("/screener", methods=['GET', 'POST'])
+def screener():
+    form = SQLSearchForm()
+    if form.validate_on_submit():
+        m_payout_ratio = form.payout_ratio_field.data
+        m_operating_margin = form.operating_margin_field.data
+        m_profit_margin = form.profit_margin_field.data
+        print ('Payout Ratio: ' + m_payout_ratio)
+        print ('Operating margin: ' + m_operating_margin)
+        print ('Profit margin: ' + m_profit_margin)
+        m_searchResults = filter_stocks(payout_ratio=m_payout_ratio, operating_margin=m_operating_margin, profit_margin=m_profit_margin)
+        return render_template('sqlSearch.html', title='Screener After Submit', form=form, searchResults= m_searchResults)
+    return render_template('sqlSearch.html', title='Screener', form=form)
+################################################################################
+#Blog Section
+################################################################################
+@app.route("/blog")
+def blog():
+    posts = Post.query_all()
+    return render_template('blog.html', posts=posts)
 
 @app.route("/post/new", methods=['GET', 'POST'])
 @login_required
