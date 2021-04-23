@@ -72,7 +72,7 @@ def clean_statistics(file_path):
         stats[col] = parse_big_num(stats[col])
 
     stats['most_recent_quarter'] = pd.to_datetime(
-            stats['most_recent_quarter']).dt.strftime("%Y-%m-%d")
+        stats['most_recent_quarter']).dt.strftime("%Y-%m-%d")
 
     stats = stats.dropna(subset=['symbol', 'most_recent_quarter'], how='any')
     stats = stats.fillna(-999)
@@ -90,49 +90,77 @@ def clean_financials(file_path):
     financials = financials.fillna(0)
     return financials
 
+
 def concat_univ(data='stats', output_dir='.'):
     file_name = 'all_{}_clean.csv'.format(data)
     df_list = []
     for folder in ['data_sp500', 'data_nasdaq', 'data_other']:
-        df_list.append(pd.read_csv(os.path.join(folder, file_name)))      
+        df_list.append(pd.read_csv(os.path.join(folder, file_name)))
     df = pd.concat(df_list)
-    if data =='stats':
-        df = df.sort_values('most_recent_quarter').drop_duplicates(subset=['symbol'], keep='last')
+    if data == 'stats':
+        df = df.sort_values('most_recent_quarter').drop_duplicates(
+            subset=['symbol'], keep='last')
     else:
-        df = df.sort_values(['symbol','date']).drop_duplicates(subset=['symbol','date'], keep='last')
+        df = df.sort_values(['symbol', 'date']).drop_duplicates(
+            subset=['symbol', 'date'], keep='last')
     df.to_csv(os.path.join(output_dir, file_name), index=False)
+
+
+def keep_newest(prices, n=300):
+    return prices.sort_values(['symbol', 'date'], ascending=False).groupby('symbol').head(n)
+
+
+def financials_subset(financials):
+    financials = financials[[
+        'symbol', 'date',
+        'income_before_tax',
+        'net_income',
+        'gross_profit',
+        'ebit',
+        'operating_income',
+        'total_revenue',
+        'total_operating_expenses',
+        'cost_of_revenue',
+        'total_assets',
+        'cash',
+        'total_current_liabilities',
+        'total_current_assets']]
+    return financials
 
 
 if __name__ == "__main__":
 
     for folder in ['data_sp500', 'data_nasdaq', 'data_other']:
         statistics = clean_statistics(os.path.join(folder, "all_stats.csv"))
-        financials = clean_financials(os.path.join(folder, "all_financials_q.csv"))
+        financials = clean_financials(
+            os.path.join(folder, "all_financials_q.csv"))
         prices = clean_prices(os.path.join(folder, "all_prices.csv"))
 
-        statistics.to_csv(os.path.join(folder, "all_stats_clean.csv"), index=False)
-        financials.to_csv(os.path.join(folder, "all_financials_clean.csv"), index=False)
-        prices.to_csv(os.path.join(folder, "all_prices_clean.csv"), index=False)
+        statistics.to_csv(os.path.join(
+            folder, "all_stats_clean.csv"), index=False)
+        financials.to_csv(os.path.join(
+            folder, "all_financials_clean.csv"), index=False)
+        prices.to_csv(os.path.join(
+            folder, "all_prices_clean.csv"), index=False)
 
     os.makedirs('data', exist_ok=True)
-    for data in  ['stats', 'financials', 'prices']:
+    for data in ['stats', 'financials', 'prices']:
         concat_univ(data, 'data')
 
-
-
     statistics = pd.read_csv("data/all_stats_clean.csv", index_col=[0])
-    financials =  pd.read_csv("data/all_financials_clean.csv")
+    financials = pd.read_csv("data/all_financials_clean.csv")
     prices = pd.read_csv("data/all_prices_clean.csv")
 
-    inds = statistics.index.intersection(prices['symbol'].unique()).intersection(financials['symbol'])
-
+    inds = statistics.index.intersection(
+        prices['symbol'].unique()).intersection(financials['symbol'])
 
     statistics = statistics.loc[inds]
     financials = financials[financials['symbol'].isin(inds)]
-    prices = prices[prices['symbol'].isin(inds)]
+    financials = financials_subset(financials)
 
-    statistics.to_csv("data/all_stats_clean.csv")
-    financials.to_csv("data/all_financials_clean.csv", index=False)
-    batch_size = (len(prices) // 3)+1
-    for i in range(3):
-        prices.iloc[i*batch_size:(i+1)*batch_size].to_csv("data/all_prices_clean_part{}.csv".format(i), index=False)
+    prices = prices[prices['symbol'].isin(inds)]
+    prices = keep_newest(prices, 300).sort_values(['symbol', 'date'])
+
+    statistics.to_csv("data/all_stats_clean_small.zip")
+    financials.to_csv("data/all_financials_clean_small.zip", index=False)
+    prices.to_csv("data/all_prices_clean_small.zip", index=False)

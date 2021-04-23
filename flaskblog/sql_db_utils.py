@@ -1,6 +1,7 @@
 import mysql.connector
 import os
 
+
 def request_connection():
     """
     connect to MySQL database
@@ -18,7 +19,8 @@ def request_connection():
     )
     return conn
 
-def request_cursor(conn):
+
+def request_cursor(conn, prepared=False):
     """
     return a MySQLCursorDict object. This type of cursor return a list of
     dictionary, where each row is a dictionary, key of this dictionary
@@ -27,7 +29,11 @@ def request_cursor(conn):
     When query result contains 1 row, this type of cursor returns a list with a
     single element.
     """
-    return conn.cursor(buffered=True, dictionary=True)
+    if prepared:
+        return conn.cursor(prepared=True)
+    else:
+        return conn.cursor(buffered=True, dictionary=True)
+
 
 def execute_query(query, fetch=True, commit=True):
     """excute sql query
@@ -62,5 +68,30 @@ def execute_query(query, fetch=True, commit=True):
         conn.commit()
 
     cur.close()
+    conn.close()
+    return r
+
+
+def execute_prepared_stmt(stmt, data):
+    """Execute prepared statement
+
+    Parameters
+    ----------
+    stmt : str
+        statement to execute
+    data : tuple
+        data to pass to prepared statement
+
+    Returns
+    -------
+    list of tuples
+        list of rows
+    """
+    conn = request_connection()
+    cur = request_cursor(conn, prepared=True)
+
+    cur.execute(stmt, data)
+    r = cur.fetchall()
+
     conn.close()
     return r

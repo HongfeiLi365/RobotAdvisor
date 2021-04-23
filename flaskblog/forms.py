@@ -77,14 +77,47 @@ class AddStockToPortfolioForm(FlaskForm):
     submit = SubmitField('Submit')
 
 class SQLSearchForm(FlaskForm):
-    payout_ratio_choices = [('Any','Any'), ('None','None'), ('Positive','Positive'), ('Low','Low'), ('High','High')]
-    payout_ratio_field = SelectField('Payout Ratio', choices=payout_ratio_choices)
+    market_cap_choices = [('Any', 'Any'),
+                          ('Micro(<$300mln)', 'Micro (<$300mln)'),
+                          ('Small($300mln~$2bln)', 'Small ($300mln~$2bln)'),
+                          ('Mid($2bln~$10bln)', 'Mid ($2bln~$10bln)'),
+                          ('Large(>$10bln)', 'Large (>$10bln)')]
+    market_cap_field = SelectField(
+        'Market Cap', choices=market_cap_choices)
 
-    operating_margin_choices = [('Any','Any'), ('Positive','Positive'), ('Negative','Negative'), ('High','High'),
-                                ('Very Negative','Very Negative')]
-    operating_margin_field = SelectField('Operating Margin', choices=operating_margin_choices)
+    sma_choices = [('Any', 'Any'),
+                   ('Price above SMA200', 'Price above SMA200'),
+                   ('Price below SMA200', 'Price below SMA200')]
+    sma_field = SelectField(
+        'Price / 200-Day Simple Moving Average', choices=sma_choices)
 
-    profit_margin_choices = [('Any','Any'), ('Positive','Positive'), ('Negative','Negative'), ('High','High')]
-    profit_margin_field = SelectField('Profit Margin', choices=profit_margin_choices)
+    ps_choices = [('Any', 'Any'),
+                  ('Low(<1)', 'Low(<1)'),
+                  ('High(>10)', 'High(>10)'),
+                  ('Under 10', 'Under 10')]
+    ps_field = SelectField(
+        'Price to Sales Ratio', choices=ps_choices)
 
+    gross_margin_choices = [('Any', 'Any'),
+                            ('Positive(>0%)', 'Positive (>0%)'),
+                            ('Negative(<0%)', 'Negative (<0%)'),
+                            ('High(>50%)', 'High (>50%)')]
+    gross_margin_field = SelectField(
+        'Gross Margin', choices=gross_margin_choices)
+
+    profit_margin_choices = [('Any', 'Any'),
+                             ('Positive(>0%)', 'Positive (>0%)'),
+                             ('Negative(<0%)', 'Negative (<0%)'),
+                             ('High(>20%)', 'High (>20%)')]
+    profit_margin_field = SelectField(
+        'Profit Margin', choices=profit_margin_choices)
+
+    operating_margin_choices = [('Any', 'Any'),
+                                ('Positive(>0%)', 'Positive (>0%)'),
+                                ('Negative(<0%)', 'Negative (<0%)'),
+                                ('High(>25%)', 'High (>25%)'),
+                                ('Very Negative(<-20%)', 'Very Negative (<-20%)')]
+    operating_margin_field = SelectField(
+        'Operating Margin', choices=operating_margin_choices)
+        
     submit = SubmitField('Search')
