@@ -89,7 +89,7 @@ class SQLSearchForm(FlaskForm):
                    ('Price above SMA200', 'Price above SMA200'),
                    ('Price below SMA200', 'Price below SMA200')]
     sma_field = SelectField(
-        'Price 200-Day Moving Average', choices=sma_choices)
+        'Price / 200-Day Simple Moving Average', choices=sma_choices)
 
     ps_choices = [('Any', 'Any'),
                   ('Low(<1)', 'Low(<1)'),

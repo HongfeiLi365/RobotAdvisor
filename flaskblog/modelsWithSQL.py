@@ -232,12 +232,12 @@ class StockSQL():
             a record from database
         """
         self.symbol = row[0]
-        self.market_cap = row[1]
-        self.sma200 = row[2]
-        self.ps = row[3]
-        self.gross_margin = row[4]
-        self.profit_margin = row[5]
-        self.operating_margin = row[6]
+        self.market_cap = int(row[1])
+        self.sma200 = round(row[2], 4)
+        self.ps = round(row[3], 4)
+        self.gross_margin = round(row[4], 4)
+        self.profit_margin = round(row[5], 4)
+        self.operating_margin = round(row[6], 4)
 
 
 def filter_stocks(market_cap='Any', sma200='Any', ps='Any',
