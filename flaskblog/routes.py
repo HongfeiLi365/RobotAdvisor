@@ -180,14 +180,21 @@ def deleteFromPortfolio(stock_name, portfolio_id):
 def screener():
     form = SQLSearchForm()
     if form.validate_on_submit():
-        m_payout_ratio = form.payout_ratio_field.data
-        m_operating_margin = form.operating_margin_field.data
+        m_market_cap = form.market_cap_field.data
+        m_sma = form.sma_field.data
+        m_ps = form.ps_field.data
+        m_gross_margin = form.gross_margin_field.data
         m_profit_margin = form.profit_margin_field.data
-        print ('Payout Ratio: ' + m_payout_ratio)
-        print ('Operating margin: ' + m_operating_margin)
-        print ('Profit margin: ' + m_profit_margin)
-        m_searchResults = filter_stocks(payout_ratio=m_payout_ratio, operating_margin=m_operating_margin, profit_margin=m_profit_margin)
-        return render_template('sqlSearch.html', title='Screener After Submit', form=form, searchResults= m_searchResults)
+        m_operating_margin = form.operating_margin_field.data
+        print('Operating margin: ' + m_operating_margin)
+        print('Profit margin: ' + m_profit_margin)
+        m_searchResults = filter_stocks(
+            market_cap=m_market_cap,
+            sma200=m_sma, ps=m_ps,
+            gross_margin=m_gross_margin,
+            profit_margin=m_profit_margin,
+            operating_margin=m_operating_margin)
+        return render_template('sqlSearch.html', title='Screener After Submit', form=form, searchResults=m_searchResults)
     return render_template('sqlSearch.html', title='Screener', form=form)
 ################################################################################
 #Blog Section
