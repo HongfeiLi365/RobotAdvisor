@@ -501,7 +501,7 @@ class Stock():
     def int_conv(self, num):
         try:
             num = num.strip('\n')
-            num = num.strip('.0')
+            num = num.split('.')[0]
         except:
             pass
         return int(num)
