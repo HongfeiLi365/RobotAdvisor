@@ -5,6 +5,9 @@ from .neo4j_db_utils import execute_query
 
 def recommend(symbol_list, n = 3, n_label = 5):
     """
+    first pull stocks with the targeted label into a pool from the stock with the largest volume to the leaset volume.
+    then, recommend stock from the largest volume stock to the least
+
     parameter:
     ----------
     symbol_list, a list of symbols of stocks in the current portfolio
@@ -24,10 +27,10 @@ def recommend(symbol_list, n = 3, n_label = 5):
     # start to fill stocks into the minimum label group
     while(n > 0):
         label_to_get = np.argmin(status_counter_array)
-        rows = execute_query("MATCH (n:stock) WHERE n.label = %s return n.symbol limit 100"%(label_to_get))
+        rows = execute_query("MATCH (n:stock) WHERE n.label = %s AND n.volume > 0 return n.symbol order by n.volume DESC limit 200"%(label_to_get))
         unique_stock_added = False
         while(not unique_stock_added):
-            row = rows[random.randint(0,99)]
+            row = rows.pop(0)
             symbol = row.data()['n.symbol']
             if symbol not in symbol_list:
                 unique_stock_added = True
