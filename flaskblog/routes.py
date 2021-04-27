@@ -6,8 +6,8 @@ from flaskblog import app, bcrypt
 from flaskblog.forms import RegistrationForm, LoginForm, UpdateAccountForm, PostForm, PortfolioForm, AddStockToPortfolioForm, SQLSearchForm
 from .modelsWithNeo4j import User, Post, Portfolio, Stock
 from flask_login import login_user, current_user, logout_user, login_required
-from .sql_db_utils import execute_query
 from .modelsWithSQL import filter_stocks
+from .neo4j_db_utils import execute_query
 
 
 @app.route("/about")
@@ -107,9 +107,10 @@ def portfolio():
 @login_required
 def edit_portfolio(portfolio_id):
     portfolio = Portfolio().get_or_404(portfolio_id)
+    recommendations = Portfolio.recommend_stocks(portfolio=portfolio)
     if (len(portfolio.member)<1):
         flash('You have no stocks in this portfolio', 'info')
-    return render_template('edit_portfolio.html', title=portfolio.name, portfolio = portfolio)
+    return render_template('edit_portfolio.html', title=portfolio.name, portfolio = portfolio, recommendations = recommendations)
 
 
 @app.route("/portfolio/new", methods=['GET', 'POST'])
@@ -132,11 +133,13 @@ def delete_portfolio(portfolio_id):
     return redirect(url_for('portfolio'))
 
 @app.route("/portfolio/addStock/<int:portfolio_id>", methods=['GET', 'POST'])
+@app.route("/portfolio/addStock/<int:portfolio_id>/<string:defaultNameInput>", methods=['GET', 'POST'])
 @login_required
-def addStockToPortfolio(portfolio_id):
+def addStockToPortfolio(portfolio_id,defaultNameInput = None):
     form = AddStockToPortfolioForm()
     m_Portfolio = Portfolio().get_or_404(portfolio_id)
     recommendations = Portfolio.recommend_stocks(portfolio=m_Portfolio)
+    form.name.data = defaultNameInput
     if form.validate_on_submit():
         m_Stock = Stock().get(symbol=form.name.data.upper())
         if (Portfolio.add_stock(portfolio=m_Portfolio, stock=m_Stock)):
@@ -160,7 +163,14 @@ def recommend(portfolio_id):
 def stockDetails(stock_name, portfolio_id):
     m_Stock = Stock().get(symbol=stock_name)
     m_title = "Details +" + m_Stock.symbol
-    return render_template('stock_details.html', title=m_title, stock=m_Stock, portfolio_id=portfolio_id)
+    inPortfolio = False
+    try:
+        if execute_query("MATCH (p:portfolio)-[:contains]->(s:stock) WHERE p.id = %s AND s.symbol = '%s' RETURN s" % (portfolio_id, stock_name)) != []:
+            inPortfolio = True
+            return render_template('stock_details.html', title=m_title, stock=m_Stock, portfolio_id=portfolio_id, inPortfolio = inPortfolio)
+    except:
+        pass
+    return render_template('stock_details.html', title=m_title, stock=m_Stock, portfolio_id=portfolio_id, inPortfolio = inPortfolio)
 
 @app.route("/portfolio/Stock/delete/<string:stock_name>/<int:portfolio_id>", methods=['POST'])
 @login_required

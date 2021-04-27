@@ -1,6 +1,6 @@
 {% extends "layout.html" %}
 {% block content %}
-<div class="container-fluid">
+<div class="content-section">
 	<div class="table">
 			<div class="table-title">
 				<div class="row">
@@ -44,24 +44,38 @@
 						<td>{{member.operating_margin}}</td>
 						<td>{{member.profit_margin}}</td>
 						<td>{{member.diluted_eps}}</td>
-						<td><a href="{{ url_for('stockDetails', stock_name=member['symbol'], portfolio_id=portfolio.id) }}">View<br></a></td>
+						<td><a href="{{ url_for('stockDetails', stock_name=member['symbol'], portfolio_id=portfolio.id)  }}">View<br></a></td>
 		            </tr>
 					{% endfor %}
 				</tbody>
 			</table>
-			<!-- <div style="text-align:left">
-				<p>Looking for some new stocks? Click the button to see your recommended stocks.
-					 Your recomendation is created with the help of machine learning.</p>
-			</div> -->
-			<div style="text-align:center">
-				<a href="{{ url_for('portfolio') }}" class="btn btn-secondary">
-					<i class="material-icons align-bottom">&#xE5C4;</i>
-					<span>Return to your other portfolios</span></a>
-				<!-- <a href="{{ url_for('recommend', portfolio_id=portfolio.id)}}" class="btn btn-info">
-					<i class="material-icons align-bottom">&#xE39F;</i>
-					<span>Recomendations</span></a> -->
-			</div>
-	</div>
+		</div>
+</div>
+<div class="content-section">
+    <h2>Machine Learning Recomendations</h2>
+    <table id="sortableTable" class="table table-striped table-hover">
+        <thead>
+            <tr>
+                <th onclick="sortTable(0)">#</th>
+                <th onclick="sortTable(1)">Symbol</th>
+                <th onclick="sortTable(2)">Revenue Per Share</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for stock in recommendations %}
+            <tr>
+                <td>{{loop.index}}</td>
+                <td><a href="{{ url_for('stockDetails', stock_name=stock['symbol'], portfolio_id=portfolio.id) }}">{{stock.symbol}}<br></a></td>
+                <td>{{stock.revenue_per_share}}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+<div style="text-align:center">
+	<a href="{{ url_for('portfolio') }}" class="btn btn-secondary">
+		<i class="material-icons align-bottom">&#xE5C4;</i>
+		<span>Return to your other portfolios</span></a>
 </div>
 <!-- Modal -->
 <div class="modal fade" id="deleteEntirePortfolioModal" tabindex="-1" role="dialog" aria-labelledby="deleteEntirePortfolioModal" aria-hidden="true">
