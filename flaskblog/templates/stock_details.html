@@ -1,6 +1,6 @@
 {% extends "layout.html" %}
 {% block content %}
-<div class="container-fluid">
+<div class="content-section">
 	<div class="table">
 		<div class="table-wrapper">
 			<div class="table-title">
@@ -8,9 +8,18 @@
 					<div class="col">
 						<h2>Details - {{stock.symbol}}</h2>
 					</div>
-					<div class="col-flex text-right">
-						<a href="#deleteFromPortfolioModal" class="btn btn-danger" data-toggle="modal"><i class="material-icons align-bottom">&#xE92B;</i> <span>Delete Stock From Portfolio</span></a>
-					</div>
+					{% if inPortfolio %}
+						<div class="col-flex text-right">
+							<a href="#deleteFromPortfolioModal" class="btn btn-danger" data-toggle="modal"><i class="material-icons align-bottom">&#xE92B;</i> <span>Delete Stock From Portfolio</span></a>
+						</div>
+					{% else %}
+						<div class="col-flex text-right">
+							<a href="{{ url_for('addStockToPortfolio', portfolio_id=portfolio_id, defaultNameInput=stock.symbol) }}" class="btn btn-success">
+								<i class="material-icons align-bottom">&#xE147;</i>
+								<span>Add to Portfolio</span></a>
+						</div>
+					{% endif %}
+
 					<div class="col-flex text-right">
 						<a href="{{ url_for('edit_portfolio', portfolio_id=portfolio_id) }}" class="btn btn-info">Return to Portfolio<br></a>
 					</div>
