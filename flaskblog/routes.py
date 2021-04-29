@@ -139,7 +139,6 @@ def addStockToPortfolio(portfolio_id,defaultNameInput = None):
     form = AddStockToPortfolioForm()
     m_Portfolio = Portfolio().get_or_404(portfolio_id)
     recommendations = Portfolio.recommend_stocks(portfolio=m_Portfolio)
-    form.name.data = defaultNameInput
     if form.validate_on_submit():
         m_Stock = Stock().get(symbol=form.name.data.upper())
         if (Portfolio.add_stock(portfolio=m_Portfolio, stock=m_Stock)):
@@ -147,6 +146,10 @@ def addStockToPortfolio(portfolio_id,defaultNameInput = None):
         else:
             flash('Error! Stock not present in database', 'danger')
         return redirect(url_for('edit_portfolio', portfolio_id=portfolio_id))
+        
+    #This section will prefill the "Name of Stock" Field on the webpage.
+    form.name.data = defaultNameInput
+
     return render_template('addStock.html', title='Add Stock',
                            form=form, legend='Add Stock to Portfolio',
                            portfolio=m_Portfolio,
