@@ -22,7 +22,11 @@ def recommend(symbol_list, n = 3, n_label = 5):
     # count the number of stocks in each label group
     for stock in symbol_list:
         row = execute_query("MATCH (n:stock) WHERE n.symbol = '%s' return n.label"%(stock))
-        label = int(row[0].data()['n.label']) # unwrap the return of neo4j query
+        try:
+            label = int(row[0].data()['n.label']) # unwrap the return of neo4j query
+        except:
+            # randomly assign a label when the stock is not clustered
+            label = random.randint(0, n_label - 1)
         status_counter_array[label] = status_counter_array[label] + 1
     # start to fill stocks into the minimum label group
     while(n > 0):
