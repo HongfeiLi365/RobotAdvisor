@@ -123,9 +123,9 @@ class Post():
 
         Returns
         -------
-        list of portafolio objects, order by the posted date of the post from new to old
+        list of post objects, order by the posted date of the post from new to old
         """
-        rows = execute_query('MATCH (n:portafolio) RETURN n order by n.date_posted')
+        rows = execute_query('MATCH (n:post) RETURN n order by n.date_posted')
         print(rows)
         posts = []
         for row in rows:
@@ -137,29 +137,29 @@ class Post():
 
     @classmethod
     def add_post(cls, title, content, author):
-        """save a new portafolio to database
+        """save a new post to database
 
         Parameters
         ----------
         title : str
-            name of the portafolio
+            name of the post
         content : str
             not sure what is it for now
         author : User object
-            user who created this portafolio
+            user who created this post
         """
-        max_id = execute_query('MATCH (n:portafolio) RETURN max(n.id) as maxid')[
+        max_id = execute_query('MATCH (n:post) RETURN max(n.id) as maxid')[
             0]['maxid']
         if max_id == None:
             max_id = 0
             execute_query(
-                "CREATE CONSTRAINT IF NOT EXISTS ON (n:portafolio) ASSERT n.title IS UNIQUE", fetch=False)
+                "CREATE CONSTRAINT IF NOT EXISTS ON (n:post) ASSERT n.title IS UNIQUE", fetch=False)
             execute_query(
-                "CREATE CONSTRAINT IF NOT EXISTS ON (n:portafolio) ASSERT n.id IS UNIQUE", fetch=False)
+                "CREATE CONSTRAINT IF NOT EXISTS ON (n:post) ASSERT n.id IS UNIQUE", fetch=False)
 
-        execute_query("CREATE (:portafolio {id: %s, title: '%s', date_posted: '%s', content: '%s', user_id: %s})" % (
+        execute_query("CREATE (:post {id: %s, title: '%s', date_posted: '%s', content: '%s', user_id: %s})" % (
             max_id + 1, title, datetime.utcnow(), content, author.id), fetch=False)
-        execute_query("MATCH (a:user), (p:portafolio) WHERE p.id = %s AND a.id = %s AND p.user_id = %s CREATE (a)-[:owns]->(p)" % (
+        execute_query("MATCH (a:user), (p:post) WHERE p.id = %s AND a.id = %s AND p.user_id = %s CREATE (a)-[:owns]->(p)" % (
             max_id + 1, author.id, author.id))
 
     @classmethod
@@ -172,47 +172,23 @@ class Post():
             the post to be deleted
         """
         execute_query(
-            "MATCH (a:user)-[o:owns]->(p:portafolio) WHERE p.id=%s DELETE o" % (post.id), fetch=False)
-        execute_query("MATCH (p:portafolio) WHERE p.id=%s DELETE p" %
+            "MATCH (a:user)-[o:owns]->(p:post) WHERE p.id=%s DELETE o" % (post.id), fetch=False)
+        execute_query("MATCH (p:post) WHERE p.id=%s DELETE p" %
                       (post.id), fetch=False)
-
-    @classmethod
-    def add_stock(cls, post_id=None, stock=None):
-        """
-        add the relationship between the portafolio and the stock
-        Parameters
-        ----------
-        post_id: id of the portafolio
-        stock: symbol of a stock
-        """
-        execute_query(
-            "MATCH (p:portafolio) WHERE p.id = %s CREATE (p)-[:contains]->(s:stock {symbol:'%s'})" % (post_id, stock))
-
-    @classmethod
-    def delete_stock(cls, post_id=None, stock=None):
-        """
-        delete the relationship between the portafolio and the stock
-        Parameters
-        ----------
-        post_id: id of the portafolio
-        stock: symbol of a stock
-        """
-        execute_query(
-            "MATCH (p:portafolio {id:%s})-[r:contains]->(s:stock {symbol:'%s'}) DELETE r" % (post_id, stock))
 
     def get(self, post_id=None):
         """
-        Retrieve a portafolio from database by id.
+        Retrieve a post from database by id.
         Return None if such a post does not exist in database.
 
         Returns
         -------
         Post object
-            retrieved portafolio
+            retrieved post
         """
         try:
             row = execute_query(
-                "MATCH (p:portafolio) WHERE p.id=%s return p" % (post_id))
+                "MATCH (p:post) WHERE p.id=%s return p" % (post_id))
             print(row)
             row = row[0].data()['p']
             self._load_row(row)
@@ -247,7 +223,7 @@ class Post():
         Update post title and content in database by current attribute values
         """
         execute_query(
-            "MATCH (p:portafolio) WHERE p.id = %s SET p.title = '%s', p.content = '%s'" % (
+            "MATCH (p:post) WHERE p.id = %s SET p.title = '%s', p.content = '%s'" % (
                 self.id, self.title, self.content),
             fetch=False)
 
@@ -289,7 +265,7 @@ class Portfolio():
 
         Returns
         -------
-        list of portafolio objects
+        list of portfolio objects
         """
         rows = execute_query('MATCH (n:portfolio) RETURN n')
         # print(rows)
@@ -312,7 +288,7 @@ class Portfolio():
 
         Returns
         -------
-        list of portafolio objects
+        list of portfolio objects
         """
         rows = execute_query(
             'MATCH (n:portfolio) WHERE n.user_id = %s RETURN n' % (user.id))
@@ -329,14 +305,14 @@ class Portfolio():
 
     @classmethod
     def add_portfolio(cls, name, user):
-        """save a new portafolio to database
+        """save a new portfolio to database
         The query first checks that whether the relationship exits
         Parameters
         ----------
         name : str
-          name of the portafolio
+          name of the portfolio
         user : User object
-          user who created this portafolio
+          user who created this portfolio
         """
         max_id = execute_query('MATCH (n:portfolio) RETURN max(n.id) as maxid')[
             0]['maxid']
@@ -372,7 +348,7 @@ class Portfolio():
     @classmethod
     def add_stock(cls, portfolio=None, stock=None):
         """
-        add the relationship between the portafolio and the stock
+        add the relationship between the portfolio and the stock
         Only execute when the relationship does not exist
         Parameters
         ----------
@@ -424,7 +400,7 @@ class Portfolio():
     @classmethod
     def delete_stock(cls, portfolio=None, stock=None):
         """
-        delete the relationship between the portafolio and the stock
+        delete the relationship between the portfolio and the stock
         Parameters
         ----------
         portfolio: object
@@ -442,13 +418,13 @@ class Portfolio():
 
     def get(self, portfolio_id=None):
         """
-        Retrieve a portafolio from database by id.
+        Retrieve a portfolio from database by id.
         Return None if such a post does not exist in database.
 
         Returns
         -------
         Post object
-            retrieved portafolio
+            retrieved portfolio
         """
         try:
             row = execute_query(
