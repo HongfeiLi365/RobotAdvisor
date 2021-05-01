@@ -56,12 +56,19 @@ sudo chmod 777 /etc/authbind/byport/80
 4. Inside initialization folder, run dump_data.py to create prices, financials, and statistics tables. (Change username and password in the script to whatever you set for MySQL during installation) 
 
 # To initialize Neo4j on your own PC for testing purpose
-1. Install [Neo4j](https://www.digitalocean.com/community/tutorials/how-to-install-and-configure-neo4j-on-ubuntu-20-04), set username and password. Make sure that they are consistent with the ones in the neo4j_test/load.py and recommendation/loadNeo4j.py
-2. Run these two scripts separately, eg. go to directory neo4j_test/, then run 
+1. Install [Neo4j](https://www.digitalocean.com/community/tutorials/how-to-install-and-configure-neo4j-on-ubuntu-20-04), set username and password. Make sure that they are consistent with the ones in the initialization/load.py and initialization/loadNeo4j.py
+2. Run these two scripts separately. 
+
+First, go to the direcotry that the script is located
 ```
-cd neo4j_test
+cd initialization
+```
+Run the script to populate the Neo4j database with stock nodes.
+```
 python3 load.py
-cd ../recommendation
+```
+Run the script to cluster the stocks and assign the "label" attribute to each stock node.
+```
 python3 loadNeo4j.py
 ```
 3. Then the Neo4j database should be loaded with nodes of stock.
