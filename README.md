@@ -65,11 +65,11 @@ cd initialization
 ```
 Run the script to populate the Neo4j database with stock nodes.
 ```
-python3 load.py
+python3 load_stocks_neo4j.py
 ```
 Run the script to cluster the stocks and assign the "label" attribute to each stock node.
 ```
-python3 loadNeo4j.py
+python3 label_stocks_neo4j.py
 ```
 3. Then the Neo4j database should be loaded with nodes of stock.
 
