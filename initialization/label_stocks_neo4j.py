@@ -3,7 +3,7 @@ import pandas as pd
 import numpy as np
 from sklearn.cluster import KMeans
 
-sys.path.append('../flaskblog')
+sys.path.append('../robotadvisor')
 import neo4j_db_utils as n4j
 
 class Label:

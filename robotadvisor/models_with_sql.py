@@ -3,7 +3,7 @@ from flask_login import UserMixin
 from .sql_db_utils import execute_query, execute_prepared_stmt
 from flask import abort
 
-# from flaskblog import login_manager
+# from robotadvisor import login_manager
 
 # @login_manager.user_loader
 # def load_user(user_id):

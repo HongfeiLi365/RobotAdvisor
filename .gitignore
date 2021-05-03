@@ -1,6 +1,6 @@
 venv/
-flaskblog/__pycache__
-flaskblog/static/profile_pics/
+robotadvisor/__pycache__
+robotadvisor/static/profile_pics/
 nohup.out
 __pycache__/
 

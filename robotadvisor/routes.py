@@ -2,8 +2,8 @@ import os
 import secrets
 from PIL import Image
 from flask import render_template, url_for, flash, redirect, request, abort
-from flaskblog import app, bcrypt
-from flaskblog.forms import RegistrationForm, LoginForm, UpdateAccountForm, PostForm, PortfolioForm, AddStockToPortfolioForm, SQLSearchForm
+from robotadvisor import app, bcrypt
+from robotadvisor.forms import RegistrationForm, LoginForm, UpdateAccountForm, PostForm, PortfolioForm, AddStockToPortfolioForm, SQLSearchForm
 from .models_with_neo4j import User, Post, Portfolio, Stock
 from flask_login import login_user, current_user, logout_user, login_required
 from .models_with_sql import filter_stocks

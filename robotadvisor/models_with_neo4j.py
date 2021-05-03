@@ -1,5 +1,5 @@
 from datetime import datetime
-from flaskblog import login_manager
+from robotadvisor import login_manager
 from flask_login import UserMixin
 from .neo4j_db_utils import execute_query
 from flask import abort
