@@ -4,9 +4,9 @@ from PIL import Image
 from flask import render_template, url_for, flash, redirect, request, abort
 from flaskblog import app, bcrypt
 from flaskblog.forms import RegistrationForm, LoginForm, UpdateAccountForm, PostForm, PortfolioForm, AddStockToPortfolioForm, SQLSearchForm
-from .modelsWithNeo4j import User, Post, Portfolio, Stock
+from .models_with_neo4j import User, Post, Portfolio, Stock
 from flask_login import login_user, current_user, logout_user, login_required
-from .modelsWithSQL import filter_stocks
+from .models_with_sql import filter_stocks
 from .neo4j_db_utils import execute_query
 
 
@@ -20,7 +20,7 @@ def home():
     return render_template('home.html', title='Home')
 
 ################################################################################
-#User login section. Utilizes the modelsWithNeo4j class
+#User login section. Utilizes the models_with_Neo4j class
 ################################################################################
 
 @app.route("/register", methods=['GET', 'POST'])
@@ -92,7 +92,7 @@ def account():
                            image_file=image_file, form=form)
 
 ################################################################################
-#Portfolio Section. Utilizes the modelsWithNeo4j class
+#Portfolio Section. Utilizes the models_with_Neo4j class
 ################################################################################
 @app.route("/portfolio")
 @login_required
