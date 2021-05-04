@@ -1,15 +1,43 @@
 {% extends "layout.html" %}
 {% block content %}
-    <h1>Welcome to Robot Advisor!</h1>
-    <h4>To get started:</h4>
+
+<table style="text-align:center">
+  <tbody>
+    <tr>
+      <img src="../static/pictures/robot.svg" width="50%" style="display: block;margin-left: auto;margin-right: auto;">
+    </tr>
+
+    <tr>
+      <h1 style="text-align:center">Beep. Beep. I'm Your Robot Advisor!</h1>
+    </tr>
+    <tr>
+      <h3 style="text-align:center">
+        <small class="text-muted" >To Get Started:</small>
+      </h3>
+    </tr>
+
     {% if current_user.is_authenticated %}
-      <a href="{{ url_for('portfolio') }}">View Existing Portfolios<br></a>
-      <a href="{{ url_for('new_portfolio') }}">Add New Portfolio<br></a>
-      <a href="{{ url_for('blog') }}">View Posts on Forum<br></a>
-      <a href="{{ url_for('logout') }}">Logout<br></a>
+    <tr>
+      <p class="lead" style="text-align:center">
+        <a href="{{ url_for('portfolio') }}" class="btn btn-success">Portfolio<br></a>
+        <a href="{{ url_for('screener') }}" class="btn btn-info">Screener</a>
+        <a href="{{ url_for('blog') }}" class="btn btn-warning">Forum<br></a>
+        <a href="{{ url_for('logout') }}" class="btn btn-danger">Logout<br></a>
+      </p>
+    </tr>
     {% else %}
-      <a href="{{ url_for('login') }}">Login<br></a>
-      <a href="{{ url_for('register') }}">Register<br></a>
-      <a href="{{ url_for('blog') }}">Forum<br></a>
+    <tr>
+      <p class="lead" style="text-align:center">
+        <a href="{{ url_for('login') }}" class="btn btn-success">Login<br></a>
+        <a href="{{ url_for('register') }}" class="btn btn-primary">Register<br></a>
+      </p>
+    </tr>
     {% endif %}
+
+  </tbody>
+</table>
+
+
+
+
 {% endblock content %}
