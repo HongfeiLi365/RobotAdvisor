@@ -4,4 +4,11 @@ flask
 yahoo_fin
 html5lib
 pandas
+numpy
+pandas_ta
 mysql-connector-python
+Flask-Login
+Flask-WTF
+WTForms
+Flask-Bcrypt
+Pillow

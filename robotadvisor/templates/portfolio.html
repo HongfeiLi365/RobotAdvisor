@@ -1,0 +1,35 @@
+{% extends "layout.html" %}
+{% block content %}
+<h1>Your Portfolios</h1>
+<table
+  id="sortableTable"
+  class="table" table-striped
+  >
+    <thead>
+    <tr>
+      <th scope="col" onclick="sortTable(0)">#</th>
+      <th scope="col" onclick="sortTable(1)"">Portfolio Name</th>
+      <th scope="col">Details</th>
+      <th scope="col">Delete</th>
+    </tr>
+    </thead>
+    <tbody>
+        {% for item in results %}
+            <tr>
+              <th scope="row">{{loop.index}}</th>
+              <td><a href="{{ url_for('edit_portfolio', portfolio_id=item['id']) }}">{{ item['name']}}<br></a></td>
+              <td><a href="{{ url_for('edit_portfolio', portfolio_id=item['id']) }}">View<br></a></td>
+              <td>
+                  <form action="{{ url_for('delete_portfolio', portfolio_id=item['id']) }}" method="POST">
+          		     <input class="btn btn-danger" type="submit" value="Delete">
+          		  </form>
+              </td>
+            </tr>
+        {% endfor %}
+    </tbody>
+    </table>
+    <p>Click on a portfolio's name or the details link on the table to edit the portfolio. </p>
+    <div style="text-align:center">
+        <a href="{{ url_for('new_portfolio') }}" class="btn btn-success">Add New Portfolio<br></a>
+    </div>
+{% endblock content %}
