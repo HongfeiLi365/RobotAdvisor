@@ -318,8 +318,8 @@ class Portfolio():
             0]['maxid']
         if max_id == None:
             max_id = 0
-            execute_query(
-                "CREATE CONSTRAINT IF NOT EXISTS ON (n:portfolio) ASSERT n.name IS UNIQUE", fetch=False)
+            #execute_query(
+             #   "CREATE CONSTRAINT IF NOT EXISTS ON (n:portfolio) ASSERT n.name IS UNIQUE", fetch=False)
             execute_query(
                 "CREATE CONSTRAINT IF NOT EXISTS ON (n:portfolio) ASSERT n.id IS UNIQUE", fetch=False)
 
