@@ -1,6 +1,7 @@
 venv/
 robotadvisor/__pycache__
-robotadvisor/static/profile_pics/
+robotadvisor/static/profile_pics/*
+!robotadvisor/static/profile_pics/default.jpg
 nohup.out
 __pycache__/
 
