@@ -1,14 +1,15 @@
 # robotadvisor
-CS411 Database System Project. View your current portfolio, and use the Robot to find predict the future of your portfolio!
+This repository is a course project for CS411 Database System of UIUC. Robotadvisor is a website where users can create and manage porftfolios of stocks, and get machine-learning-based stock recommendations.
+
 # Languages and Tools
  * Python
  * Flask
  * MySQL
  * Neo4j
- * Bootstrap 4
 
+# Run robotadvisor on AWS EC2
 
-# Persistent Session for Flask on AWS EC2
+## Persistent Session for Flask on AWS EC2
 I created a persistent session named 'robotadvisor' on our EC2 server
 Use the following command to list all sessions.
 ```
@@ -20,7 +21,7 @@ Use the following command to create a new persistent session.
 tmux new -s YOUR_SESSION_NAME
 ```
 
-# Stop Flask on AWS EC2
+## Stop Flask on AWS EC2
 1. Run the following command to connect to session 'robotadvisor' 
 ```
 tmux attach -t robotadvisor  
@@ -29,7 +30,7 @@ tmux attach -t robotadvisor
 
 3. Press Ctrl+B, then press D, to detach from the session window
 
-# Run Flask on AWS EC2
+## Run Flask on AWS EC2
 1. run the following commands
 ```
 tmux attach -t robotadvisor
@@ -45,7 +46,8 @@ sudo touch /etc/authbind/byport/80
 sudo chmod 777 /etc/authbind/byport/80
 ```
 
-# To initialize MySQL on your own PC for testing purpose
+# Set Up Databases
+## To initialize MySQL on your own PC for testing purpose
 
 1. Install MySQL, create user and password following prompt during installation. [Tutorial (Ubuntu)](https://www.digitalocean.com/community/tutorials/how-to-install-mysql-on-ubuntu-20-04)
 
@@ -55,7 +57,7 @@ sudo chmod 777 /etc/authbind/byport/80
 
 4. Inside initialization folder, run dump_data.py to create prices, financials, and statistics tables. (Change username and password in the script to whatever you set for MySQL during installation) 
 
-# To initialize Neo4j on your own PC for testing purpose
+## To initialize Neo4j on your own PC for testing purpose
 1. Install [Neo4j](https://www.digitalocean.com/community/tutorials/how-to-install-and-configure-neo4j-on-ubuntu-20-04), set username and password. Make sure that they are consistent with the ones in the initialization/load.py and initialization/loadNeo4j.py
 2. Run these two scripts separately. 
 
@@ -73,8 +75,7 @@ python3 label_stocks_neo4j.py
 ```
 3. Then the Neo4j database should be loaded with nodes of stock.
 
-# Commands I have been using to run the robotadvisor on UIUC VM
-
+# (Deprecated) Run robotadvisor on UIUC VM
 
 Instructions to run
 1. Create a new Virtual environment. Run: python3 -m venv /path/to/new/virtual/environment
